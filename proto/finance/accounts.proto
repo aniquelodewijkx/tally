@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package finance;
+
+import "google/protobuf/timestamp.proto";
+
+service AccountService {
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse);
+}
+
+message Account {
+  int64 id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message ListAccountsRequest {}
+
+message ListAccountsResponse {
+  repeated Account accounts = 1;
+}
+
+message CreateAccountRequest {
+  string name = 1;
+}
+
+message CreateAccountResponse {
+  Account account = 1;
+}
+
+// Renames an account.
+message UpdateAccountRequest {
+  int64 id = 1;
+  string name = 2;
+}
+
+message UpdateAccountResponse {
+  Account account = 1;
+}

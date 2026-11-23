@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package finance;
+
+import "google/protobuf/timestamp.proto";
+
+// Groups of transactions that belong together: a transfer between your own accounts, or an
+// expense with its reimbursements (Tikkies, refunds).
+service LinkService {
+  rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
+  // Pairs of unlinked transactions on two accounts with opposite amounts, booked at most 5 days
+  // apart (e.g. ING paying the AMEX bill). Computed on the fly; confirm one with CreateGroup.
+  // Reimbursements are linked by hand.
+  rpc SuggestTransfers(SuggestTransfersRequest) returns (SuggestTransfersResponse);
+  // Rules: a transfer has one or two transactions, on different accounts, adding up to zero.
+  // A one-sided transfer may name the account on its other side (counter_account_id).
+  // Transfer members lose their splits. Reimbursements without splits get default splits,
+  // spread pro rata over the categories of the group's expenses.
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+  rpc UpdateGroupMembers(UpdateGroupMembersRequest) returns (UpdateGroupMembersResponse);
+  // Each transaction becomes its own one-sided transfer. Skips linked transactions.
+  rpc MarkTransfers(MarkTransfersRequest) returns (MarkTransfersResponse);
+  // Members stay, unlinked.
+  rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+}
+
+enum LinkKind {
+  LINK_KIND_UNSPECIFIED = 0;
+  LINK_KIND_TRANSFER = 1;
+  LINK_KIND_REIMBURSEMENT = 2;
+}
+
+message LinkGroup {
+  int64 id = 1;
+  LinkKind kind = 2;
+  optional string title = 3;
+  repeated int64 transaction_ids = 4;
+  google.protobuf.Timestamp created_at = 5;
+  // For a one-sided transfer: the account on its other side, which isn't imported (a savings or
+  // cash pot). Cleared once the real other side is linked.
+  optional int64 counter_account_id = 6;
+}
+
+message TransferSuggestion {
+  int64 outgoing_id = 1;
+  int64 incoming_id = 2;
+}
+
+message GetGroupRequest {
+  int64 id = 1;
+}
+
+message GetGroupResponse {
+  LinkGroup group = 1;
+}
+
+message SuggestTransfersRequest {}
+
+message SuggestTransfersResponse {
+  repeated TransferSuggestion suggestions = 1;
+}
+
+message CreateGroupRequest {
+  LinkKind kind = 1;
+  optional string title = 2;
+  repeated int64 transaction_ids = 3;
+  // Only for a transfer with one transaction: where the money went or came from, e.g. "Savings".
+  optional int64 counter_account_id = 4;
+}
+
+message CreateGroupResponse {
+  LinkGroup group = 1;
+}
+
+message UpdateGroupMembersRequest {
+  int64 group_id = 1;
+  repeated int64 add_transaction_ids = 2;
+  repeated int64 remove_transaction_ids = 3;
+}
+
+message UpdateGroupMembersResponse {
+  LinkGroup group = 1;
+}
+
+message DeleteGroupRequest {
+  int64 id = 1;
+}
+
+message DeleteGroupResponse {}
+
+message MarkTransfersRequest {
+  repeated int64 transaction_ids = 1;
+  // The pot on the other side; unset for an account you don't track.
+  optional int64 counter_account_id = 2;
+}
+
+message MarkTransfersResponse {
+  int64 updated = 1;
+  int64 skipped = 2;
+}

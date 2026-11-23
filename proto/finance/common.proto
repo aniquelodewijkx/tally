@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package finance;
+
+// A calendar date without a time zone, such as a booking date.
+message Date {
+  int32 year = 1;
+  int32 month = 2; // 1-12
+  int32 day = 3; // 1-31
+}

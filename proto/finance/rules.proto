@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package finance;
+
+import "finance/transactions.proto";
+import "google/protobuf/timestamp.proto";
+
+// Auto-label rules: "counterparty contains <pattern> -> category", or "-> transfer to a pot" (an
+// account you never import, such as savings or a broker). Rules only label transactions
+// that have no category yet and aren't part of a transfer or reimbursement group; they run on
+// import and once when a rule is created. When several match, the longest pattern wins, then the
+// narrower rule (an account, a direction or an amount range), then the newest.
+service RuleService {
+  // Alphabetical, each with how many labels it set.
+  rpc ListRules(ListRulesRequest) returns (ListRulesResponse);
+  // Every transaction a rule matches, with what it would do with each.
+  rpc PreviewRule(PreviewRuleRequest) returns (PreviewRuleResponse);
+  rpc CreateRule(CreateRuleRequest) returns (CreateRuleResponse);
+  // A new category moves the labels this rule set; labels you set stay as they are.
+  rpc UpdateRule(UpdateRuleRequest) returns (UpdateRuleResponse);
+  // The labels it set stay, as if you had set them yourself.
+  rpc DeleteRule(DeleteRuleRequest) returns (DeleteRuleResponse);
+}
+
+enum RuleDirection {
+  // Money in and out.
+  RULE_DIRECTION_UNSPECIFIED = 0;
+  RULE_DIRECTION_OUT = 1;
+  RULE_DIRECTION_IN = 2;
+}
+
+message Rule {
+  int64 id = 1;
+  // Lowercase, trimmed, single-spaced; matched as a substring of the counterparty name.
+  string pattern = 2;
+  // The target: exactly one of category_id and counter_account_id is set.
+  optional int64 category_id = 3;
+  RuleDirection direction = 4;
+  // Only on this account; absent for every account.
+  optional int64 account_id = 5;
+  int64 labels = 6;
+  google.protobuf.Timestamp created_at = 7;
+  // Mark matches as a transfer to (or from) this pot instead of labelling them with a category.
+  optional int64 counter_account_id = 8;
+  // Only amounts of at least / at most this size, in cents, inclusive (the sign is direction's job).
+  optional int64 min_amount_cents = 9;
+  optional int64 max_amount_cents = 10;
+}
+
+// What a rule does with a transaction it matches.
+enum RuleMatchState {
+  RULE_MATCH_STATE_UNSPECIFIED = 0;
+  // Unlabelled and not linked: the rule labels it.
+  RULE_MATCH_STATE_WILL_LABEL = 1;
+  // The previewed rule (rule_id) already labelled it.
+  RULE_MATCH_STATE_LABELLED_BY_RULE = 2;
+  // Already categorized or linked: the rule leaves it alone.
+  RULE_MATCH_STATE_HANDLED = 3;
+}
+
+message RuleMatch {
+  Transaction transaction = 1;
+  RuleMatchState state = 2;
+}
+
+message ListRulesRequest {}
+
+message ListRulesResponse {
+  repeated Rule rules = 1;
+}
+
+message PreviewRuleRequest {
+  string pattern = 1;
+  RuleDirection direction = 2;
+  optional int64 account_id = 3;
+  optional int64 min_amount_cents = 4;
+  optional int64 max_amount_cents = 5;
+  // When previewing an existing rule: marks what it already labelled.
+  optional int64 rule_id = 6;
+}
+
+message PreviewRuleResponse {
+  reserved 1, 2;
+  int64 will_label = 3;
+  int64 labelled_by_rule = 4;
+  int64 handled = 5;
+  // Newest first; at most a few hundred (the counts cover all matches).
+  repeated RuleMatch matches = 6;
+}
+
+message CreateRuleRequest {
+  string pattern = 1;
+  // Exactly one of category_id and counter_account_id (a pot).
+  optional int64 category_id = 2;
+  RuleDirection direction = 3;
+  optional int64 account_id = 4;
+  // Also label the unlabelled transactions this rule matches now.
+  bool apply_to_existing = 5;
+  optional int64 counter_account_id = 6;
+  optional int64 min_amount_cents = 7;
+  optional int64 max_amount_cents = 8;
+}
+
+message CreateRuleResponse {
+  Rule rule = 1;
+  int64 labelled = 2;
+}
+
+// A new category or pot moves the labels this rule set. Switching between a category and a pot
+// leaves its earlier labels in place, as yours.
+message UpdateRuleRequest {
+  int64 id = 1;
+  string pattern = 2;
+  // Exactly one of category_id and counter_account_id (a pot).
+  optional int64 category_id = 3;
+  RuleDirection direction = 4;
+  optional int64 account_id = 5;
+  optional int64 counter_account_id = 6;
+  optional int64 min_amount_cents = 7;
+  optional int64 max_amount_cents = 8;
+}
+
+message UpdateRuleResponse {
+  Rule rule = 1;
+}
+
+message DeleteRuleRequest {
+  int64 id = 1;
+}
+
+message DeleteRuleResponse {}

@@ -1,0 +1,6 @@
+inputs:
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+  # mbx build cache: every cargo in the shell runs through it (see devenv.nix).
+  mr-boxington:
+    url: github:jdx/mr-boxington/v1.29.0

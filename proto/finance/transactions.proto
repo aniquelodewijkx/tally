@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package finance;
+
+import "finance/common.proto";
+import "finance/links.proto";
+
+service TransactionService {
+  // Newest first.
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse);
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+  // Replaces all splits of a transaction. The splits must add up to the transaction amount;
+  // an empty list makes it uncategorized. Transfer members can't have splits.
+  rpc SetSplits(SetSplitsRequest) returns (SetSplitsResponse);
+  // One category for the whole amount of each transaction, or none. Skips transfers and zero amounts.
+  rpc SetCategory(SetCategoryRequest) returns (SetCategoryResponse);
+  rpc SetNotes(SetNotesRequest) returns (SetNotesResponse);
+}
+
+// The part of a transaction that belongs to one category.
+message Split {
+  int64 category_id = 1;
+  // Signed like the transaction.
+  int64 amount_cents = 2;
+}
+
+message Transaction {
+  int64 id = 1;
+  int64 account_id = 2;
+  int64 import_batch_id = 3;
+  Date booked_on = 4;
+  // Signed cents from the account's point of view. Negative means money left the account.
+  int64 amount_cents = 5;
+  optional string counterparty_name = 6;
+  optional string counterparty_iban = 7;
+  string description = 8;
+  optional int64 link_group_id = 9;
+  optional string notes = 10;
+  // Empty means uncategorized.
+  repeated Split splits = 11;
+  // Kind and title of the link group, when link_group_id is set.
+  optional LinkKind link_kind = 12;
+  optional string link_title = 13;
+  // The link group's counter_account_id: for a one-sided transfer, the pot on its other side.
+  optional int64 link_counter_account_id = 14;
+  // Set when a rule labelled this transaction.
+  optional int64 rule_id = 15;
+}
+
+message TransactionFilter {
+  optional int64 account_id = 1;
+  // Inclusive.
+  optional Date booked_from = 2;
+  // Inclusive.
+  optional Date booked_to = 3;
+  optional int64 category_id = 4;
+  // Only transactions without splits that aren't part of a transfer.
+  bool uncategorized_only = 5;
+  optional int64 link_group_id = 6;
+  // Case-insensitive match on the description or counterparty name.
+  optional string search = 7;
+  // Only one-sided transfers whose other side is this account: a pot's activity.
+  optional int64 counter_account_id = 8;
+}
+
+// Returns all matching transactions; add paging once that becomes too many.
+message ListTransactionsRequest {
+  TransactionFilter filter = 1;
+}
+
+message ListTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message GetTransactionRequest {
+  int64 id = 1;
+}
+
+message GetTransactionResponse {
+  Transaction transaction = 1;
+}
+
+message SetSplitsRequest {
+  int64 transaction_id = 1;
+  repeated Split splits = 2;
+}
+
+message SetSplitsResponse {
+  Transaction transaction = 1;
+}
+
+message SetCategoryRequest {
+  repeated int64 transaction_ids = 1;
+  // Unset makes the transactions uncategorized.
+  optional int64 category_id = 2;
+}
+
+message SetCategoryResponse {
+  int64 updated = 1;
+  int64 skipped = 2;
+}
+
+message SetNotesRequest {
+  int64 transaction_id = 1;
+  // Empty or absent clears the notes.
+  optional string notes = 2;
+}
+
+message SetNotesResponse {
+  Transaction transaction = 1;
+}

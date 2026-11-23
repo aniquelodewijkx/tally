@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Label Rules</title>
+<link rel="icon" href="data:,">
+<style>
+  /* Layout: a review document in the data-model page's style, with small Apple-style UI sketches. */
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f0efeb; --text: #1d1d1b; --muted: #6b6a65; --border: #e2e0da;
+    --accent: #2f6f5e; --code-bg: #f3f2ee; --blue: #007aff; --green: #34c759; --pos: #1e7a46; --warn: #9a6b00;
+    --ui-fill: rgba(120,120,128,.1); --ui-sep: rgba(60,60,67,.13);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1f1f1d; --surface-2: #2a2a27; --text: #ecebe6; --muted: #a3a29b; --border: #3a3935;
+      --accent: #6fc2a8; --code-bg: #262624; --blue: #0a84ff; --green: #30d158; --pos: #7fd6a0; --warn: #e2b54a;
+      --ui-fill: rgba(120,120,128,.24); --ui-sep: rgba(84,84,88,.5); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1f1f1d; --surface-2: #2a2a27; --text: #ecebe6; --muted: #a3a29b; --border: #3a3935;
+    --accent: #6fc2a8; --code-bg: #262624; --blue: #0a84ff; --green: #30d158; --pos: #7fd6a0; --warn: #e2b54a;
+    --ui-fill: rgba(120,120,128,.24); --ui-sep: rgba(84,84,88,.5); color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .86em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-block: 32px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  header h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); }
+  nav.toc { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--border); margin: 20px -16px 0; padding: 10px 16px; display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 14px; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--text); }
+  h2 { font-size: 21px; margin: 44px 0 10px; scroll-margin-top: 56px; text-wrap: balance; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 8px 0; max-width: 820px; }
+  .lede { color: var(--muted); }
+  .box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 12px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .stat .v { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+  .stat .l { color: var(--muted); font-size: 13px; }
+  .stat.hi { border-color: var(--accent); }
+  .curve { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .curve-row { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 13.5px; }
+  .curve-row .track { height: 10px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+  .curve-row .track i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .curve-row b { text-align: right; font-variant-numeric: tabular-nums; }
+  .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 12px; }
+  .principle { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .principle b { display: block; margin-bottom: 4px; }
+  .principle span { color: var(--muted); font-size: 14px; }
+  pre.code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; margin: 12px 0 0; }
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border-bottom: 1px solid var(--border); padding: 4px 10px 6px 0; }
+  td { border-bottom: 1px solid var(--border); padding: 7px 10px 7px 0; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.mono { font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); }
+  .pill.win { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+  /* UI sketches */
+  .sketches { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 14px; align-items: start; }
+  .sk { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; font: 13.5px/1.45 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+  .sk h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .sk .grp { background: var(--ui-fill); border-radius: 10px; overflow: hidden; }
+  .sk .row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; }
+  .sk .row + .row { box-shadow: 0 -.5px 0 var(--ui-sep); }
+  .sk .row .v { margin-left: auto; color: var(--muted); }
+  .sk .ci { width: 22px; height: 22px; border-radius: 50%; background: var(--green); flex: none; }
+  .sk .ci.blue { background: var(--blue); }
+  .sk .ci.teal { background: #30b0c7; }
+  .sk .ci.pink { background: #ff2d55; }
+  .sk .auto { font-size: 10.5px; font-weight: 700; color: var(--blue); background: color-mix(in srgb, var(--blue) 12%, transparent); padding: 1px 6px; border-radius: 99px; }
+  .sk .prompt { margin-top: 10px; border-radius: 10px; padding: 10px 12px; background: color-mix(in srgb, var(--blue) 10%, transparent); }
+  .sk .prompt b { display: block; }
+  .sk .prompt span { color: var(--muted); font-size: 12.5px; }
+  .sk .btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+  .sk .btn { border-radius: 7px; padding: 4px 11px; background: var(--ui-fill); font-weight: 500; }
+  .sk .btn.primary { background: var(--blue); color: #fff; }
+  .sk .stat2 { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 10px; overflow: hidden; background: var(--ui-fill); }
+  .sk .stat2 div { padding: 10px 12px; }
+  .sk .stat2 div + div { box-shadow: -.5px 0 0 var(--ui-sep); }
+  .sk .stat2 b { display: block; font-size: 20px; }
+  .sk .stat2 span { font-size: 12px; color: var(--muted); }
+  .sk .pos { color: var(--pos); }
+  .sk .muted { color: var(--muted); }
+  ul.list li { margin: 6px 0; max-width: 820px; }
+  .rec { border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Auto-label: rules for recurring transactions</h1>
+    <p>Built · labels groceries, trains and subscriptions automatically</p>
+  </header>
+  <nav class="toc">
+    <a href="#numbers">Why per counterparty</a>
+    <a href="#how">How it works</a>
+    <a href="#where">Where rules come from</a>
+    <a href="#model">Data model</a>
+    <a href="#matching">Matching</a>
+    <a href="#api">API</a>
+    <a href="#ui">UI</a>
+    <a href="#later">Not now</a>
+    <a href="#questions">Questions</a>
+  </nav>
+
+  <h2 id="numbers">Why one rule per counterparty</h2>
+  <p>Most spending goes to a small set of counterparties you pay again and again (the supermarket, the train, subscriptions), and new months mostly bring the same names. So one rule per counterparty is the right unit: a few dozen rules label most of a typical month. No pattern language or machine learning is needed for that.</p>
+
+  <h2 id="how">How it works</h2>
+  <div class="principles">
+    <div class="principle"><b>A rule is one sentence</b><span>"Counterparty contains <code>albert heijn</code> → Groceries." Optionally only for money going out (or in), or only on one account.</span></div>
+    <div class="principle"><b>Rules only fill blanks</b><span>They never change a transaction that already has a category, and never touch transfers or members of a reimbursement group. Your own choices always win.</span></div>
+    <div class="principle"><b>You can see every auto label</b><span>A label set by a rule remembers which rule. It shows a small "auto" mark, and the inspector says "Labelled by rule albert heijn → Groceries". Changing it by hand makes it yours.</span></div>
+    <div class="principle"><b>Two moments to run</b><span>On import, for the new rows, inside the same database transaction. And once when you create a rule, for existing uncategorized rows, after showing how many it will label.</span></div>
+  </div>
+
+  <h2 id="where">Where rules come from</h2>
+  <ul class="list">
+    <li><b>From what you just did.</b> After you categorize a transaction whose counterparty has more uncategorized rows, the inspector and the inbox offer: "Always label <i>Albert Heijn</i> as Groceries? 41 more will be labelled." One click creates the rule and applies it.</li>
+    <li><b>Suggested.</b> When you pick the same category for the same counterparty twice in the inbox, the next card for that counterparty proposes the rule instead of asking again.</li>
+    <li><b>Starter rules (optional).</b> Next to the starter categories: a short list of common Dutch merchants (Albert Heijn, Jumbo, Lidl, NS, Netflix, Spotify…) mapped to them. They'd label a good share of rows on day one.</li>
+  </ul>
+
+  <h2 id="model">Data model</h2>
+  <p class="lede">One new table, and one nullable column that records which rule set a split. It replaces the "rules + category_manual flag" entry on the deferred list: a split with no rule is a manual one.</p>
+  <pre class="code">CREATE TYPE rule_direction AS ENUM ('out', 'in');
+
+CREATE TABLE rules (
+    id           bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    pattern      text NOT NULL CHECK (pattern &lt;&gt; '' AND pattern = lower(btrim(pattern))),
+    category_id  bigint NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
+    direction    rule_direction,                                   -- NULL: money in and out
+    account_id   bigint REFERENCES accounts (id) ON DELETE CASCADE, -- NULL: every account
+    created_at   timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT rules_pattern_scope_key UNIQUE NULLS NOT DISTINCT (pattern, direction, account_id)
+);
+
+-- Which rule set this split. NULL = set by you (or a reimbursement default). Deleting a rule keeps its labels as manual.
+ALTER TABLE transaction_splits ADD COLUMN rule_id bigint REFERENCES rules (id) ON DELETE SET NULL;</pre>
+  <div class="tbl box">
+    <table>
+      <tr><th>Why</th><th>Choice</th></tr>
+      <tr><td><code>rule_id</code> on splits</td><td>Shows the "auto" mark and the rule in the inspector; lets a rule's category change move its own labels along; keeps manual labels untouched by construction.</td></tr>
+      <tr><td>Pattern is a lowercased substring</td><td>Stable across "ALBERT HEIJN 1234 AMSTERDAM" and "Albert Heijn 1234 Amsterdam NLD". Matched against the counterparty name only: that field holds the merchant in both exports.</td></tr>
+      <tr><td>Category delete cascades</td><td>A rule without a category is meaningless. The splits themselves are protected by their own RESTRICT, so a category in use still can't be deleted.</td></tr>
+      <tr><td>Unique per scope</td><td>One rule per pattern, direction and account, so there's never a tie on the same pattern.</td></tr>
+    </table>
+  </div>
+
+  <h2 id="matching">Matching: which rule wins</h2>
+  <p>A transaction can match several rules. The <b>longest pattern</b> wins, because it's the more specific one; a rule limited to an account or a direction beats an equally long general one. Only one category is set, for the full amount.</p>
+  <div class="tbl box">
+    <table>
+      <tr><th>Counterparty</th><th>Rules that match</th><th>Result</th></tr>
+      <tr><td class="mono">ALBERT HEIJN 1234 AMSTERDAM</td><td><code>albert heijn</code> → Groceries</td><td><span class="pill win">Groceries</span></td></tr>
+      <tr><td class="mono">AH TO GO SCHIPHOL</td><td><code>ah</code> → Groceries · <code>ah to go</code> → Dining out</td><td><span class="pill win">Dining out</span> longer pattern</td></tr>
+      <tr><td class="mono">NS GROEP IZ NS REIZIGERS</td><td><code>ns groep</code> → Transport</td><td><span class="pill win">Transport</span></td></tr>
+      <tr><td class="mono">Tikkie</td><td><code>tikkie</code> (money out) → Dining out</td><td><span class="pill win">Dining out</span> only when you pay a Tikkie</td></tr>
+      <tr><td class="mono">Oranje Spaarrekening</td><td>none</td><td><span class="pill">stays in the inbox</span> transfers are marked, not labelled</td></tr>
+    </table>
+  </div>
+
+  <h2 id="api">API changes (proto)</h2>
+  <pre class="code">service RuleService {
+  rpc ListRules(ListRulesRequest) returns (ListRulesResponse);       // each with how many splits it set
+  rpc PreviewRule(PreviewRuleRequest) returns (PreviewRuleResponse); // "41 uncategorized transactions match", with a few examples
+  rpc CreateRule(CreateRuleRequest) returns (CreateRuleResponse);    // apply_to_existing: bool -> labelled count
+  rpc UpdateRule(UpdateRuleRequest) returns (UpdateRuleResponse);    // a new category moves this rule's own labels along
+  rpc DeleteRule(DeleteRuleRequest) returns (DeleteRuleResponse);    // its labels stay, as manual
+}
+
+message Split              { ...; optional int64 rule_id = 3; }
+message ImportFileResponse { ...; int32 auto_labelled = 3; }</pre>
+
+  <h2 id="ui">UI</h2>
+  <div class="sketches">
+    <div class="sk">
+      <h4>Inspector, right after categorizing</h4>
+      <div class="grp">
+        <div class="row"><span class="ci"></span>Food › Groceries<span class="v">−42,10</span></div>
+      </div>
+      <div class="prompt">
+        <b>Always label Albert Heijn as Groceries?</b>
+        <span>41 uncategorized transactions match, and future imports too.</span>
+        <div class="btns"><span class="btn">Not Now</span><span class="btn primary">Create Rule</span></div>
+      </div>
+    </div>
+    <div class="sk">
+      <h4>Import result</h4>
+      <div class="stat2">
+        <div><b class="pos">612</b><span>new</span></div>
+        <div><b>431</b><span>labelled by rules</span></div>
+        <div><b>181</b><span>to categorize</span></div>
+      </div>
+      <div class="btns"><span class="btn">Review Labels</span><span class="btn primary">Categorize 181</span></div>
+    </div>
+    <div class="sk">
+      <h4>Rules (sheet, from Categories)</h4>
+      <div class="grp">
+        <div class="row"><span class="ci"></span><span><b>albert heijn</b> <span class="muted">→ Groceries</span></span><span class="v">164</span></div>
+        <div class="row"><span class="ci teal"></span><span><b>ns groep</b> <span class="muted">→ Transport</span></span><span class="v">17</span></div>
+        <div class="row"><span class="ci pink"></span><span><b>netflix</b> <span class="muted">→ Subscriptions</span></span><span class="v">11</span></div>
+        <div class="row"><span class="ci blue"></span><span><b>vattenfall</b> <span class="muted">→ Utilities · money out</span></span><span class="v">11</span></div>
+      </div>
+      <p class="muted" style="margin:8px 0 0;font-size:12px">Counts are how many labels each rule set. Illustrative.</p>
+    </div>
+    <div class="sk">
+      <h4>A row labelled by a rule</h4>
+      <div class="grp">
+        <div class="row"><span class="ci"></span><span><b>ALBERT HEIJN 1001</b><br><span class="muted" style="font-size:12px">ING · Apple Pay · 18:02</span></span><span class="auto">AUTO</span><span class="v">−25,72</span></div>
+      </div>
+      <p class="muted" style="margin:8px 0 0;font-size:12px">The inspector says "Labelled by rule albert heijn → Groceries · Edit Rule".</p>
+    </div>
+  </div>
+
+  <h2 id="later">Not in this proposal</h2>
+  <ul class="list">
+    <li><b>Rules that split</b> (e.g. 70% Groceries / 30% Household): rare, and a split is easy to do by hand.</li>
+    <li><b>Matching on description, IBAN or amount</b>: the counterparty name already covers your recurring rows. Add a field when a real case needs it.</li>
+    <li><b>Regex or wildcards</b>: substrings plus "longest wins" cover every example above.</li>
+    <li><b>Learned labels without rules</b> (silently copying your last choice for a counterparty): hard to see why something got its label. The suggested-rule card gets the same benefit while you stay in control.</li>
+  </ul>
+
+  <h2 id="questions">Decisions</h2>
+  <ul class="list">
+    <li><b>Changing a rule's category</b> moves the labels that rule set, and only those.</li>
+    <li><b>No generic starter rules.</b> A suggested set of categories and rules built from your own exports replaces them.</li>
+    <li><b>The "Always label…" offer</b> appears the first time you categorize a counterparty, whenever other unlabelled transactions match. In the inbox, press R to accept it.</li>
+    <li><b>The API</b> exposes the rule on the transaction (<code>Transaction.rule_id</code>) rather than per split: rules always set one category for the full amount. The column stays on <code>transaction_splits</code>.</li>
+    <li><b>Transfer rules.</b> A rule's target can also be a pot: "oranje spaarrekening → transfer to or from Savings", "broker → Investments". They run like category rules, record themselves in <code>link_groups.rule_id</code>, and only target pots: a rule never links two imported accounts, so the AMEX bill stays with the transfer suggestions. Offers after marking a transfer cover money in and out.</li>
+    <li><b>Amount ranges.</b> A rule can be limited to amounts of at least and/or at most a size (inclusive; direction handles the sign), e.g. "tikkie, money out, up to 15 → Going out". A rule with a range is narrower, so it beats the same pattern without one, and one pattern can have several ranges.</li>
+    <li><b>Coverage preview.</b> While writing or editing a rule, and when expanding one in the list, a scrollable list shows every match: will label, already labelled by this rule, or handled (categorized or linked, left alone).</li>
+    <li><b>Equal-length patterns</b> (e.g. "ns groep" and "ah to go" in one name) fall back to the narrower scope, then the newest rule. A longer pattern settles it.</li>
+  </ul>
+</div>
+</body>
+</html>

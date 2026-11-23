@@ -1,0 +1,14 @@
+/target
+.devenv/
+.devenv.flake.nix
+.direnv/
+devenv.local.nix
+.pre-commit-config.yaml
+
+# Real bank exports contain IBANs and names. Anonymized fixtures live in crates/sources/tests/fixtures/.
+/*.csv
+
+# Frontend
+/web/node_modules
+/web/dist
+/web/*.tsbuildinfo

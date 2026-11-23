@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tally Mockups</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a product page around macOS-style windows. Translucent sidebar, grouped inset lists,
+     Apple system colors, SF Pro (Inter off Apple devices), rounded numerals for money. */
+  :root {
+    --bg: #f5f5f7; --surface: #ffffff; --grouped: #f2f2f7; --fill: rgba(120,120,128,.12); --fill-2: rgba(120,120,128,.07);
+    --sep: rgba(60,60,67,.13); --label: #1d1d1f; --label-2: rgba(60,60,67,.64); --label-3: rgba(60,60,67,.38);
+    --accent: #007aff; --accent-soft: rgba(0,122,255,.11); --on-accent: #ffffff;
+    --pos: #248a3d; --warn: #c93400; --warn-soft: rgba(255,149,0,.14);
+    --sidebar: rgba(232,232,237,.78); --window-edge: rgba(0,0,0,.14);
+    --shadow-window: 0 24px 64px rgba(0,0,0,.16), 0 4px 14px rgba(0,0,0,.06);
+    --shadow-sheet: 0 18px 50px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.05);
+    --green: #34c759; --orange: #ff9500; --blue: #007aff; --purple: #af52de; --pink: #ff2d55; --teal: #30b0c7;
+    --indigo: #5856d6; --yellow: #ffcc00; --gray: #8e8e93; --red: #ff3b30;
+    --font-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", system-ui, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", system-ui, sans-serif;
+    --font-num: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    /* Chart series, one per top-level category, fixed order. Validated (CVD, lightness, contrast) on #fff / #1c1c1e. */
+    --s1: #007aff; --s2: #34c759; --s3: #af52de; --s4: #ff9500; --s5: #30b0c7; --s6: #ff2d55; --s0: #c7c7cc;
+    --seg-on: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000; --surface: #1c1c1e; --grouped: #141415; --fill: rgba(120,120,128,.26); --fill-2: rgba(120,120,128,.14);
+      --sep: rgba(84,84,88,.5); --label: #f5f5f7; --label-2: rgba(235,235,245,.62); --label-3: rgba(235,235,245,.32);
+      --accent: #0a84ff; --accent-soft: rgba(10,132,255,.2); --on-accent: #ffffff;
+      --pos: #30d158; --warn: #ff9f0a; --warn-soft: rgba(255,159,10,.18);
+      --sidebar: rgba(44,44,46,.78); --window-edge: rgba(255,255,255,.12);
+      --shadow-window: 0 24px 64px rgba(0,0,0,.6), 0 4px 14px rgba(0,0,0,.4);
+      --shadow-sheet: 0 18px 50px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.3);
+      --green: #30d158; --orange: #ff9f0a; --blue: #0a84ff; --purple: #bf5af2; --pink: #ff375f; --teal: #40c8e0;
+      --indigo: #5e5ce6; --yellow: #ffd60a; --gray: #98989d; --red: #ff453a;
+      --s1: #0a84ff; --s2: #21a446; --s3: #bf5af2; --s4: #d17300; --s5: #2b9fb5; --s6: #ff375f; --s0: #4a4a4e;
+      --seg-on: #636366;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000; --surface: #1c1c1e; --grouped: #141415; --fill: rgba(120,120,128,.26); --fill-2: rgba(120,120,128,.14);
+    --sep: rgba(84,84,88,.5); --label: #f5f5f7; --label-2: rgba(235,235,245,.62); --label-3: rgba(235,235,245,.32);
+    --accent: #0a84ff; --accent-soft: rgba(10,132,255,.2); --on-accent: #ffffff;
+    --pos: #30d158; --warn: #ff9f0a; --warn-soft: rgba(255,159,10,.18);
+    --sidebar: rgba(44,44,46,.78); --window-edge: rgba(255,255,255,.12);
+    --shadow-window: 0 24px 64px rgba(0,0,0,.6), 0 4px 14px rgba(0,0,0,.4);
+    --shadow-sheet: 0 18px 50px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.3);
+    --green: #30d158; --orange: #ff9f0a; --blue: #0a84ff; --purple: #bf5af2; --pink: #ff375f; --teal: #40c8e0;
+    --indigo: #5e5ce6; --yellow: #ffd60a; --gray: #98989d; --red: #ff453a;
+    --s1: #0a84ff; --s2: #21a446; --s3: #bf5af2; --s4: #d17300; --s5: #2b9fb5; --s6: #ff375f; --s0: #4a4a4e;
+    --seg-on: #636366;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--bg); color: var(--label); font: 15px/1.5 var(--font-text); letter-spacing: -0.01em; }
+  svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  code { font-family: var(--font-mono); font-size: .84em; background: var(--fill-2); padding: 1px 5px; border-radius: 5px; }
+  :focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+
+  /* ---------- page ---------- */
+  .wrap { max-width: 1260px; margin: 0 auto; padding-block: 56px 96px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+  .hero .eyebrow { color: var(--accent); font-weight: 600; font-size: 15px; }
+  .hero h1 { font: 700 clamp(34px, 5vw, 52px)/1.06 var(--font-display); letter-spacing: -0.03em; margin: 4px 0 10px; text-wrap: balance; }
+  .hero p { color: var(--label-2); font-size: 18px; max-width: 640px; margin: 0; text-wrap: pretty; }
+  .pill-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; padding: 7px 14px; font: 500 13px var(--font-text);
+    background: var(--fill); color: var(--label); cursor: pointer; }
+  .subnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin: 32px 0 0; padding: 10px 0;
+    background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--sep); display: flex; gap: 6px; flex-wrap: wrap; }
+  .subnav a { color: var(--label-2); text-decoration: none; font-size: 13px; font-weight: 500; padding: 5px 12px; border-radius: 99px; }
+  .subnav a:hover { background: var(--fill-2); color: var(--label); }
+  section.prop { margin-top: 84px; scroll-margin-top: 70px; }
+  .prop .eyebrow { color: var(--accent); font-weight: 600; font-size: 14px; }
+  .prop h2 { font: 700 clamp(26px, 3.4vw, 36px)/1.12 var(--font-display); letter-spacing: -0.025em; margin: 2px 0 8px; text-wrap: balance; }
+  .prop .lede { color: var(--label-2); font-size: 17px; max-width: 720px; margin: 0 0 26px; text-wrap: pretty; }
+  .verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; margin-top: 26px; }
+  .vcard { background: var(--surface); border-radius: 16px; padding: 18px 20px; }
+  .vcard h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font: 600 15px var(--font-text); }
+  .vcard h3 i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .vcard.con h3 i { background: var(--orange); }
+  .vcard ul { margin: 0; padding-left: 18px; color: var(--label-2); font-size: 14px; }
+  .vcard li + li { margin-top: 4px; }
+  .api { color: var(--label-3); font-size: 13px; margin-top: 14px; }
+  .api code { color: var(--label-2); }
+
+  /* ---------- macOS window ---------- */
+  .stage { overflow-x: auto; padding: 4px 4px 36px; margin: 0 -4px; }
+  .window { min-width: 1160px; border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-window), 0 0 0 .5px var(--window-edge);
+    display: grid; grid-template-columns: 214px 1fr; font-size: 13px; letter-spacing: -0.005em; }
+  .window.inspect { grid-template-columns: 214px 1fr 330px; }
+  .sb { background: var(--sidebar); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-right: .5px solid var(--sep); padding: 14px 10px 18px; }
+  .lights { display: flex; gap: 8px; padding: 0 6px 18px; }
+  .lights i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.18); }
+  .lights i:nth-child(2) { background: #febc2e; } .lights i:nth-child(3) { background: #28c840; }
+  .sb .h { font-size: 11px; font-weight: 600; color: var(--label-3); padding: 14px 10px 4px; }
+  .sb a { display: flex; align-items: center; gap: 9px; padding: 6px 10px; border-radius: 7px; color: var(--label); text-decoration: none; font-weight: 450; }
+  .sb a svg { color: var(--accent); font-size: 16px; }
+  .sb a.on { background: var(--fill); font-weight: 600; }
+  .sb a .count { margin-left: auto; color: var(--label-3); font-size: 12px; }
+  .sb a .attn { margin-left: auto; background: var(--orange); color: #fff; font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 99px; line-height: 18px; }
+  .content { min-width: 0; display: flex; flex-direction: column; }
+  .toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 18px 10px; flex-wrap: wrap; }
+  .toolbar .title { font: 700 15px var(--font-text); letter-spacing: -0.01em; }
+  .toolbar .title small { display: block; font-weight: 400; font-size: 12px; color: var(--label-2); }
+  .spacer { flex: 1; }
+  .stepper { display: inline-flex; align-items: center; gap: 2px; }
+  .stepper span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; color: var(--label-2); font-size: 14px; }
+  .stepper span:hover { background: var(--fill-2); }
+  .seg { display: inline-flex; background: var(--fill); border-radius: 8px; padding: 2px; }
+  .seg span { padding: 3px 14px; border-radius: 6px; font-weight: 500; font-size: 12.5px; color: var(--label); }
+  .seg span.on, .seg button.on { background: var(--seg-on); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+  .search { display: flex; align-items: center; gap: 6px; background: var(--fill); border-radius: 8px; padding: 5px 9px; color: var(--label-3); width: 210px; }
+  .toggle { display: inline-flex; align-items: center; gap: 8px; color: var(--label); font-size: 12.5px; }
+  .switch { width: 32px; height: 19px; border-radius: 99px; background: var(--fill); position: relative; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch.on { background: var(--green); } .switch.on::after { left: 15px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 7px; padding: 5px 12px; font: 500 13px var(--font-text);
+    background: var(--fill); color: var(--label); white-space: nowrap; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); }
+  .btn.plain { background: transparent; color: var(--accent); padding-inline: 4px; }
+  .kbd { font: 600 10.5px var(--font-text); color: var(--label-2); background: var(--fill-2); border: .5px solid var(--sep); border-radius: 5px; padding: 1px 5px; min-width: 18px; text-align: center; }
+
+  /* category icons */
+  .ci { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--cc); color: #fff; font-size: 15px; flex: none; }
+  .ci.sm { width: 22px; height: 22px; font-size: 12px; }
+  .ci.lg { width: 46px; height: 46px; font-size: 22px; }
+  .ci svg { stroke-width: 2.2; }
+  .ci.none { background: transparent; color: var(--label-3); box-shadow: inset 0 0 0 1.5px var(--label-3); }
+  .ci.xfer { background: var(--fill); color: var(--label-2); }
+  .ci.multi { background: conic-gradient(var(--blue) 0 70%, var(--green) 70% 100%); }
+
+  /* transaction list */
+  .list { padding: 0 10px 14px; }
+  .day { font-size: 12px; font-weight: 600; color: var(--label-2); padding: 14px 10px 6px; }
+  .tx { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto 92px; align-items: center; gap: 12px; padding: 7px 10px; border-radius: 9px; }
+  .tx + .tx { box-shadow: 0 -.5px 0 var(--sep); }
+  .tx .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx .sub { color: var(--label-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx .amt { text-align: right; font-size: 14px; font-weight: 500; }
+  .tx .amt.in { color: var(--pos); }
+  .tx.dim .nm, .tx.dim .amt { color: var(--label-2); font-weight: 500; }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+  .tag.link { background: color-mix(in srgb, var(--orange) 16%, transparent); color: var(--warn); }
+  .tag.xfer { background: var(--fill-2); color: var(--label-2); }
+  .tag.add { background: var(--accent-soft); color: var(--accent); }
+  .tx.sel { background: var(--accent); box-shadow: none; }
+  .tx.sel + .tx { box-shadow: none; }
+  .tx.sel .nm, .tx.sel .amt { color: #fff; }
+  .tx.sel .sub { color: rgba(255,255,255,.78); }
+  .tx.sel .tag { background: rgba(255,255,255,.22); color: #fff; }
+  .tx.sel .ci { box-shadow: 0 0 0 1.5px rgba(255,255,255,.7); }
+
+  /* inspector */
+  .insp { background: var(--grouped); border-left: .5px solid var(--sep); padding: 18px 16px; display: flex; flex-direction: column; gap: 18px; }
+  .insp-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
+  .insp-head .big { font: 600 30px var(--font-num); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .insp-head .nm { font-weight: 600; font-size: 14px; }
+  .insp-head .meta { color: var(--label-2); font-size: 12px; }
+  .glabel { font-size: 11.5px; font-weight: 600; color: var(--label-2); text-transform: uppercase; letter-spacing: .04em; margin: 0 4px 6px; }
+  .group { background: var(--surface); border-radius: 11px; overflow: hidden; }
+  .grow { display: flex; align-items: center; gap: 10px; padding: 9px 12px; min-height: 40px; }
+  .grow + .grow { box-shadow: 0 -.5px 0 var(--sep); }
+  .grow .v { margin-left: auto; color: var(--label-2); }
+  .grow .chev { color: var(--label-3); font-size: 13px; }
+  .grow.action { color: var(--accent); font-weight: 500; }
+  .grow.total { font-weight: 700; }
+  .grow.total .v { color: var(--label); }
+  .gfoot { font-size: 12px; color: var(--label-2); margin: 6px 4px 0; }
+  .notes { color: var(--label-2); }
+
+  /* inbox */
+  .inbox { display: grid; grid-template-columns: 290px minmax(0, 1fr); flex: 1; }
+  .queue { border-right: .5px solid var(--sep); padding: 4px 10px 16px; }
+  .ring-row { display: flex; align-items: center; gap: 12px; padding: 4px 10px 14px; }
+  .ring-row b { display: block; font-size: 14px; }
+  .ring-row span { color: var(--label-2); font-size: 12px; }
+  .qh { font-size: 12px; font-weight: 600; color: var(--label-2); padding: 12px 10px 4px; display: flex; justify-content: space-between; }
+  .qi { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; }
+  .qi .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .qi.on { background: var(--accent); color: #fff; }
+  .qi .amt { font-size: 12.5px; }
+  .qi .amt.in { color: var(--pos); }
+  .stage-inner { padding: 22px 30px 30px; display: flex; flex-direction: column; gap: 18px; background: var(--grouped); flex: 1; }
+  .card { background: var(--surface); border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .card .head { display: flex; align-items: center; gap: 14px; }
+  .card .big { font: 600 32px var(--font-num); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .card .meta { color: var(--label-2); font-size: 12.5px; }
+  .picks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+  .pick { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 11px; background: var(--fill-2); }
+  .pick .kbd { margin-left: auto; }
+  .pick.top { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .pick .hint { color: var(--label-2); font-size: 11.5px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+  .pair { display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr); gap: 10px; align-items: center; margin-top: 14px; }
+  .side { background: var(--fill-2); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+  .side .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side .meta { font-size: 12px; color: var(--label-2); }
+  .side .amt { font-size: 16px; font-weight: 600; margin-top: 2px; }
+  .swap { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--fill); color: var(--label-2); font-size: 16px; }
+
+  /* overview */
+  .ov { padding: 4px 22px 24px; display: flex; flex-direction: column; gap: 18px; background: var(--grouped); flex: 1; }
+  .ov-title { display: flex; align-items: center; gap: 10px; padding-top: 14px; }
+  .ov-title h4 { margin: 0; font: 700 28px var(--font-display); letter-spacing: -0.025em; }
+  .summary { display: grid; grid-template-columns: repeat(3, 1fr) 1.15fr; background: var(--surface); border-radius: 14px; overflow: hidden; }
+  .summary > div { padding: 14px 18px; }
+  .summary > div + div { box-shadow: -.5px 0 0 var(--sep); }
+  .summary .l { color: var(--label-2); font-size: 12px; font-weight: 500; }
+  .summary .v { font: 600 24px var(--font-num); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .summary .todo { background: var(--warn-soft); display: flex; align-items: center; gap: 12px; }
+  .summary .todo .v { color: var(--warn); }
+  .summary .todo .chev { margin-left: auto; color: var(--warn); font-size: 16px; }
+  .ov-grid { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 18px; }
+  .storage { background: var(--surface); border-radius: 14px; padding: 16px 18px; }
+  .storage .row1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .storage .row1 b { font-size: 14px; }
+  .storage .row1 span { color: var(--label-2); font-size: 12px; }
+  .sbar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; gap: 2px; background: var(--fill-2); }
+  .sbar i { background: var(--cc); display: block; min-width: 3px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--label-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--cc); }
+  .cat-list .grow { min-height: 50px; }
+  .cat-list .grow.child { padding-left: 52px; min-height: 42px; }
+  .cat-list .nm { font-weight: 600; }
+  .cat-list .child .nm { font-weight: 500; }
+  .cat-list .note { font-size: 11.5px; color: var(--label-2); }
+  .cat-list .amt { margin-left: auto; font-size: 14px; font-weight: 600; text-align: right; }
+  .delta { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px; background: var(--fill-2); color: var(--label-2); min-width: 46px; text-align: center; }
+  .delta.up { background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--red); }
+  .delta.down { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--pos); }
+  .aside-card { background: var(--surface); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .aside-card .glabel { margin: 0; }
+  .aside-card .line { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  .aside-card .line .amt { margin-left: auto; }
+  .aside-card p { margin: 0; color: var(--label-2); font-size: 12px; }
+  .meter { height: 6px; border-radius: 99px; background: var(--fill); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 33%; background: var(--orange); border-radius: 99px; }
+
+  /* sheets */
+  .sheets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 22px; align-items: start; }
+  .sheet { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow-sheet), 0 0 0 .5px var(--window-edge); padding: 20px; font-size: 13.5px;
+    display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .sheet h3 { margin: 0; text-align: center; font: 700 15px var(--font-text); }
+  .sheet .sub { margin: -6px 0 0; text-align: center; color: var(--label-2); font-size: 12.5px; }
+  .sheet .foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .sheet .foot .btn { min-width: 84px; }
+  .drop { border-radius: 12px; border: 1.5px dashed var(--label-3); padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--label-2); font-size: 12.5px; }
+  .drop svg { font-size: 26px; color: var(--accent); }
+  .file { display: flex; align-items: center; gap: 12px; background: var(--fill-2); border-radius: 11px; padding: 10px 12px; }
+  .file .badge { width: 34px; height: 34px; border-radius: 9px; background: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 11px; color: var(--label-2);
+    box-shadow: 0 0 0 .5px var(--sep); }
+  .file .meta { color: var(--label-2); font-size: 12px; }
+  .popup { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 7px; padding: 4px 10px; box-shadow: 0 0 0 .5px var(--sep), 0 1px 2px rgba(0,0,0,.08); font-weight: 500; white-space: nowrap; }
+  .popup svg { color: var(--label-2); font-size: 11px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; background: var(--fill-2); border-radius: 11px; overflow: hidden; }
+  .stats div { padding: 10px 14px; }
+  .stats div + div { box-shadow: -.5px 0 0 var(--sep); }
+  .stats b { display: block; font: 600 22px var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .stats b.pos { color: var(--pos); }
+  .stats span { font-size: 12px; color: var(--label-2); }
+  .field { display: flex; align-items: center; gap: 8px; background: var(--fill-2); border-radius: 8px; padding: 6px 10px; color: var(--label); min-width: 0; }
+  .field.ph { color: var(--label-3); }
+  .field.money { justify-content: flex-end; width: 100px; flex: none; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  .cands { background: var(--fill-2); border-radius: 11px; overflow: hidden; }
+  .cand { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+  .cand + .cand { box-shadow: 0 -.5px 0 var(--sep); }
+  .cand .nm { font-weight: 600; }
+  .cand .meta { font-size: 12px; color: var(--label-2); }
+  .cand .amt { margin-left: auto; color: var(--pos); font-weight: 600; }
+  .check { width: 20px; height: 20px; border-radius: 50%; flex: none; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--label-3); color: transparent; font-size: 12px; }
+  .check.on { background: var(--accent); box-shadow: none; color: #fff; }
+  .net { display: flex; justify-content: space-between; align-items: center; background: var(--accent-soft); color: var(--accent); border-radius: 11px; padding: 10px 14px; font-weight: 600; }
+  .net .num { font-size: 17px; }
+  .srow { display: flex; align-items: center; gap: 8px; }
+  .remaining { display: flex; justify-content: space-between; align-items: center; color: var(--label-2); font-size: 12.5px; }
+  .remaining b { color: var(--pos); }
+  .tree .grow { background: var(--fill-2); }
+  .tree { border-radius: 11px; overflow: hidden; }
+  .tree .grow.child { padding-left: 44px; }
+  .tree .grow .v { font-size: 12px; }
+  .disc { color: var(--label-3); font-size: 10px; width: 10px; }
+
+  /* recommendation */
+  .recs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 14px; }
+  .rcard { background: var(--surface); border-radius: 18px; padding: 22px 24px; }
+  .rcard .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: var(--cc); font-size: 19px; margin-bottom: 12px; }
+  .rcard h3 { margin: 0 0 8px; font: 700 18px var(--font-display); letter-spacing: -0.02em; }
+  .rcard ol, .rcard ul { margin: 0; padding-left: 20px; color: var(--label-2); font-size: 14px; }
+  .rcard li + li { margin-top: 5px; }
+  .rcard b { color: var(--label); font-weight: 600; }
+  .needs { margin-top: 18px; background: var(--surface); border-radius: 18px; overflow: hidden; }
+  .needs .nrow { display: grid; grid-template-columns: minmax(0, 1.2fr) 110px minmax(0, 2fr); gap: 16px; padding: 13px 22px; align-items: baseline; font-size: 14px; }
+  .needs .nrow + .nrow { box-shadow: 0 -.5px 0 var(--sep); }
+  .needs .nrow.hd { font-size: 12px; font-weight: 600; color: var(--label-2); text-transform: uppercase; letter-spacing: .04em; padding-block: 12px 8px; }
+  .needs .nrow > :first-child { font-weight: 600; }
+  .needs .nrow > :last-child { color: var(--label-2); }
+  .status { font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; justify-self: start; white-space: nowrap; }
+  .status.ok { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--pos); }
+  .status.miss { background: var(--warn-soft); color: var(--warn); }
+  .status.later { background: var(--fill-2); color: var(--label-2); }
+  @media (max-width: 720px) {
+    .needs .nrow { grid-template-columns: 1fr; gap: 4px; }
+    .needs .nrow.hd { display: none; }
+  }
+  /* overview modes */
+  .seg button { border: 0; background: transparent; font: 500 12.5px var(--font-text); color: var(--label); padding: 3px 16px; border-radius: 6px; cursor: pointer; }
+  .ov[data-mode="month"] .ov-year, .ov[data-mode="month"] .h-year,
+  .ov[data-mode="year"] .ov-month, .ov[data-mode="year"] .h-month { display: none; }
+  .ov-month, .ov-year { display: flex; flex-direction: column; gap: 18px; }
+  .summary .v { font-variant-numeric: normal; }
+  .chart-card { background: var(--surface); border-radius: 14px; padding: 16px 18px 10px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .chart-head b { font-size: 14px; }
+  .chart-head span { color: var(--label-2); font-size: 12px; }
+  .ltoggles { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 2px; }
+  .ltoggles button { display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 99px; padding: 4px 11px 4px 9px; cursor: pointer;
+    background: var(--fill-2); color: var(--label); font: 500 12px var(--font-text); }
+  .ltoggles button i { width: 10px; height: 10px; border-radius: 3px; background: var(--k); }
+  .ltoggles button[aria-pressed="false"] { background: transparent; color: var(--label-3); box-shadow: inset 0 0 0 1px var(--sep); }
+  .ltoggles button[aria-pressed="false"] i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--k); }
+  .ltoggles button.reset { background: transparent; color: var(--accent); box-shadow: none; }
+  .chart-wrap { position: relative; }
+  .ychart { display: block; width: 100%; height: auto; }
+  .ychart text { font: 11px var(--font-text); fill: var(--label-2); font-variant-numeric: tabular-nums; }
+  .ychart .grid { stroke: var(--sep); stroke-width: 1; shape-rendering: crispEdges; }
+  .ychart .cap { font-weight: 600; fill: var(--label); }
+  .ychart .mlabel.now { font-weight: 700; fill: var(--label); }
+  .ychart .mlabel.future { fill: var(--label-3); }
+  .ychart .col { transition: opacity .15s; }
+  .ychart.focus .col:not(.hl) { opacity: .32; }
+  .ychart .hit { fill: transparent; cursor: pointer; outline: none; }
+  .ychart .hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
+  .tip { position: absolute; top: 6px; pointer-events: none; background: var(--surface); border-radius: 10px; padding: 10px 12px; font-size: 12px; min-width: 200px;
+    box-shadow: var(--shadow-sheet), 0 0 0 .5px var(--window-edge); z-index: 3; }
+  .tip .t { display: flex; justify-content: space-between; gap: 16px; font-weight: 600; margin-bottom: 6px; }
+  .tip .t b { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  .tip .r { display: grid; grid-template-columns: 12px 64px 1fr; gap: 8px; align-items: center; padding: 1px 0; }
+  .tip .r i { width: 12px; height: 2px; border-radius: 1px; background: var(--k); }
+  .tip .r b { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+  .tip .r span { color: var(--label-2); }
+  .ytable-wrap { background: var(--surface); border-radius: 14px; overflow-x: auto; }
+  table.ytable { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .ytable th, .ytable td { padding: 8px 6px; text-align: right; white-space: nowrap; }
+  .ytable th { font-weight: 600; color: var(--label-2); font-size: 11px; padding-top: 11px; }
+  .ytable th:first-child, .ytable td:first-child { text-align: left; padding-left: 14px; }
+  .ytable th:last-child, .ytable td:last-child { padding-right: 14px; }
+  .ytable tbody td, .ytable tfoot td { border-top: .5px solid var(--sep); }
+  .ytable tbody tr { cursor: pointer; }
+  .ytable tbody tr:hover td { background: var(--fill-2); }
+  .ytable tr.off td { color: var(--label-3); }
+  .ytable .key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--k); margin-right: 8px; vertical-align: -1px; }
+  .ytable tr.off .key { background: transparent; box-shadow: inset 0 0 0 1.5px var(--k); }
+  .ytable .sum { font-weight: 600; }
+  .ytable tfoot td { font-weight: 700; }
+  .ytable .future { color: var(--label-3); }
+  .ytable caption { caption-side: bottom; text-align: left; color: var(--label-3); font-size: 11.5px; padding: 8px 14px 10px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .ychart .col { transition: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-overview" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M21 12a9 9 0 1 1-9-9"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><path d="M7.5 7.5h.01"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10h18M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18M12 3l9 5H3z"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-updown" viewBox="0 0 24 24"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.8L21 7.5H6.4"/><path d="M9.5 20h.01M17.5 20h.01"/></symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24"><path d="M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3M17 21V3c-2.4 1.6-3 5-3 8h3"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L5 13.5h6L10 22l8-11.5h-6z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 13H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
+  <symbol id="i-tram" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="13" rx="3"/><path d="M6 10h12M9 20l-2 1.5M15 20l2 1.5M9.5 13h.01M14.5 13h.01"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8h14M15.5 4.5 19 8l-3.5 3.5M19 16H5M8.5 12.5 5 16l3.5 3.5"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-q" viewBox="0 0 24 24"><path d="M9.2 9a3 3 0 1 1 4.1 2.8c-.8.3-1.3 1-1.3 1.9v.3M12 17.5h.01"/></symbol>
+  <symbol id="i-case" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12.5h18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 2.5h8l4 4v15h-12z"/><path d="M14 2.5V7h4.5"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24"><path d="M12 21v-6M12 15 6 9V4M12 15l6-6V4M3.5 6.5 6 4l2.5 2.5M15.5 6.5 18 4l2.5 2.5"/></symbol>
+  <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14a6.5 6.5 0 0 1 3 6"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2.5 8 12 13l9.5-5z"/><path d="M2.5 12.5 12 17.5l9.5-5M2.5 16.5 12 21.5l9.5-5"/></symbol>
+  <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M14 6.5 17.5 3 21 6.5 17.5 10z"/><path d="M15.8 8.2 4 20M10 4l4 2.5"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Tally · Frontend v1</div>
+      <h1>Every euro, where it belongs.</h1>
+      <p>Three layouts for the main screen, the shared sheets, and a recommendation. The data is made up but shaped like real ING and credit-card exports, and every screen runs on the existing API.</p>
+    </div>
+    <button class="pill-btn" id="theme" type="button">Switch appearance</button>
+  </header>
+
+  <nav class="subnav" aria-label="Sections">
+    <a href="#a">Ledger</a><a href="#b">Inbox</a><a href="#c">Overview</a><a href="#sheets">Sheets</a><a href="#rec">Recommendation</a>
+  </nav>
+
+  <!-- ===================== A · Ledger ===================== -->
+  <section class="prop" id="a">
+    <div class="eyebrow">Proposal A</div>
+    <h2>Ledger with an inspector.</h2>
+    <p class="lede">The month's transactions in one scrolling list, grouped by day. Select a row and the inspector on the right shows its category, split, reimbursement group and notes.</p>
+    <div class="stage">
+      <div class="window inspect">
+        <aside class="sb">
+          <div class="lights"><i></i><i></i><i></i></div>
+          <a><svg class="i"><use href="#i-overview"/></svg>Overview</a>
+          <a class="on"><svg class="i"><use href="#i-list"/></svg>Transactions</a>
+          <a><svg class="i"><use href="#i-tray"/></svg>To Categorize<span class="attn">14</span></a>
+          <div class="h">Manage</div>
+          <a><svg class="i"><use href="#i-import"/></svg>Import</a>
+          <a><svg class="i"><use href="#i-tag"/></svg>Categories</a>
+          <div class="h">Accounts</div>
+          <a><svg class="i"><use href="#i-bank"/></svg>ING Betaalrekening<span class="count">540</span></a>
+          <a><svg class="i"><use href="#i-card"/></svg>Credit card<span class="count">96</span></a>
+        </aside>
+        <div class="content">
+          <div class="toolbar">
+            <div class="title">Transactions<small>November 2026 · 86 transactions</small></div>
+            <div class="stepper"><span><svg class="i"><use href="#i-left"/></svg></span><span><svg class="i"><use href="#i-right"/></svg></span></div>
+            <div class="spacer"></div>
+            <div class="search"><svg class="i"><use href="#i-search"/></svg>Search</div>
+          </div>
+          <div class="toolbar" style="padding-top:0">
+            <div class="seg"><span class="on">All</span><span>ING</span><span>AMEX</span></div>
+            <div class="spacer"></div>
+            <div class="toggle"><div class="switch"></div>Uncategorized only</div>
+          </div>
+          <div class="list">
+            <div class="day">Wednesday, 19 November</div>
+            <div class="tx"><span class="ci" style="--cc:var(--purple)"><svg class="i"><use href="#i-bag"/></svg></span><div><div class="nm">bol.com</div><div class="sub">AMEX · BOL.COM UTRECHT</div></div><span></span><span class="amt num">−34,99</span></div>
+            <div class="tx"><span class="ci" style="--cc:var(--green)"><svg class="i"><use href="#i-cart"/></svg></span><div><div class="nm">Albert Heijn</div><div class="sub">ING · Apple Pay · 18:02</div></div><span></span><span class="amt num">−42,10</span></div>
+            <div class="tx dim"><span class="ci xfer"><svg class="i"><use href="#i-swap"/></svg></span><div><div class="nm">Payment received</div><div class="sub">AMEX · HARTELIJK BEDANKT VOOR UW BETALING</div></div><span class="tag xfer">Transfer</span><span class="amt num">+1.019,66</span></div>
+            <div class="day">Monday, 17 November</div>
+            <div class="tx dim"><span class="ci xfer"><svg class="i"><use href="#i-swap"/></svg></span><div><div class="nm">American Express</div><div class="sub">ING · Incasso Amex rekening</div></div><span class="tag xfer">Transfer</span><span class="amt num">−1.019,66</span></div>
+            <div class="day">Sunday, 16 November</div>
+            <div class="tx"><span class="ci" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span><div><div class="nm">J. de Vries</div><div class="sub">ING · Tripel date eten</div></div><span class="tag link"><svg class="i"><use href="#i-back"/></svg>Tripel date eten</span><span class="amt num in">+29,00</span></div>
+            <div class="tx"><span class="ci" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span><div><div class="nm">M. Bakker</div><div class="sub">ING · tripel date</div></div><span class="tag link"><svg class="i"><use href="#i-back"/></svg>Tripel date eten</span><span class="amt num in">+29,00</span></div>
+            <div class="day">Saturday, 15 November</div>
+            <div class="tx sel"><span class="ci" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span><div><div class="nm">Restaurant De Kas</div><div class="sub">ING · Card payment · 21:40</div></div><span class="tag link"><svg class="i"><use href="#i-back"/></svg>Tripel date eten</span><span class="amt num">−116,00</span></div>
+            <div class="day">Friday, 14 November</div>
+            <div class="tx"><span class="ci none"><svg class="i"><use href="#i-q"/></svg></span><div><div class="nm">ALBERT HEIJN 1234 AMSTERDAM</div><div class="sub">AMEX</div></div><span class="tag add"><svg class="i"><use href="#i-plus"/></svg>Category</span><span class="amt num">−12,47</span></div>
+            <div class="tx"><span class="ci multi"><svg class="i"><use href="#i-split"/></svg></span><div><div class="nm">Action</div><div class="sub">ING · Household and Groceries</div></div><span></span><span class="amt num">−27,85</span></div>
+            <div class="day">Wednesday, 12 November</div>
+            <div class="tx"><span class="ci none"><svg class="i"><use href="#i-q"/></svg></span><div><div class="nm">Tikkie</div><div class="sub">ING · Bioscoop Van P. Jansen</div></div><span class="tag add"><svg class="i"><use href="#i-plus"/></svg>Category</span><span class="amt num">−12,50</span></div>
+          </div>
+        </div>
+        <aside class="insp">
+          <div class="insp-head">
+            <span class="ci lg" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span>
+            <div class="big">€ −116,00</div>
+            <div class="nm">Restaurant De Kas</div>
+            <div class="meta">Saturday 15 Nov 2026 at 21:40 · ING Betaalrekening</div>
+          </div>
+          <div>
+            <div class="glabel">Category</div>
+            <div class="group">
+              <div class="grow"><span class="ci sm" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span>Food › Dining out<span class="v num">−116,00</span><svg class="i chev"><use href="#i-right"/></svg></div>
+              <div class="grow action"><svg class="i"><use href="#i-split"/></svg>Split Across Categories</div>
+            </div>
+          </div>
+          <div>
+            <div class="glabel">Paid back · Tripel date eten</div>
+            <div class="group">
+              <div class="grow"><span class="ci sm" style="--cc:var(--gray)"><svg class="i"><use href="#i-people"/></svg></span>J. de Vries<span class="v num" style="color:var(--pos)">+29,00</span></div>
+              <div class="grow"><span class="ci sm" style="--cc:var(--gray)"><svg class="i"><use href="#i-people"/></svg></span>M. Bakker<span class="v num" style="color:var(--pos)">+29,00</span></div>
+              <div class="grow"><span class="ci sm" style="--cc:var(--gray)"><svg class="i"><use href="#i-people"/></svg></span>S. Visser<span class="v num" style="color:var(--pos)">+29,00</span></div>
+              <div class="grow total">Your share<span class="v num">−29,00</span></div>
+              <div class="grow action"><svg class="i"><use href="#i-plus"/></svg>Add Payment</div>
+            </div>
+            <div class="gfoot">Reimbursements count in November, the month of the dinner.</div>
+          </div>
+          <div>
+            <div class="glabel">Notes</div>
+            <div class="group"><div class="grow notes">Birthday dinner, 4 people</div></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="vcard"><h3><i></i>What works</h3><ul><li>A whole month fits on one screen and scans quickly.</li><li>The inspector shows "Your share −29,00", the number the Tikkie linking exists for.</li><li>Transfers stay visible but greyed out, so the AMEX bill is there without counting.</li></ul></div>
+      <div class="vcard con"><h3><i></i>What doesn't</h3><ul><li>Categorizing 14 rows means 14 trips into a picker.</li><li>It doesn't answer "where did my money go this month?"</li></ul></div>
+    </div>
+    <p class="api">API: <code>ListTransactions(filter)</code> by account, month and search · <code>ListAccounts</code> and <code>ListCategories</code> cached for names · inspector: <code>GetGroup</code>, <code>SetSplits</code>, <code>SetNotes</code>, <code>UpdateGroupMembers</code>.</p>
+  </section>
+
+  <!-- ===================== B · Inbox ===================== -->
+  <section class="prop" id="b">
+    <div class="eyebrow">Proposal B</div>
+    <h2>An inbox, one decision at a time.</h2>
+    <p class="lede">Everything that needs you in one queue: uncategorized transactions and transfer suggestions. One card at a time, driven by the keyboard. After an import you clear the inbox and you're done.</p>
+    <div class="stage">
+      <div class="window">
+        <aside class="sb">
+          <div class="lights"><i></i><i></i><i></i></div>
+          <a><svg class="i"><use href="#i-overview"/></svg>Overview</a>
+          <a><svg class="i"><use href="#i-list"/></svg>Transactions</a>
+          <a class="on"><svg class="i"><use href="#i-tray"/></svg>Inbox<span class="attn">16</span></a>
+          <div class="h">Manage</div>
+          <a><svg class="i"><use href="#i-import"/></svg>Import</a>
+          <a><svg class="i"><use href="#i-tag"/></svg>Categories</a>
+        </aside>
+        <div class="content">
+          <div class="inbox">
+            <div class="queue">
+              <div class="toolbar" style="padding-inline:10px"><div class="title">Inbox</div></div>
+              <div class="ring-row">
+                <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--fill)" stroke-width="6"/>
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round"
+                    stroke-dasharray="44.25 113.1" transform="rotate(-90 22 22)"/>
+                </svg>
+                <div><b>9 of 23 done</b><span>14 to categorize · 2 transfers</span></div>
+              </div>
+              <div class="qh"><span>Transfers</span><span>2</span></div>
+              <div class="qi"><span class="ci sm xfer"><svg class="i"><use href="#i-swap"/></svg></span><span class="nm">American Express</span><span class="amt num">1.019,66</span></div>
+              <div class="qi"><span class="ci sm xfer"><svg class="i"><use href="#i-swap"/></svg></span><span class="nm">CONTRIBUTIE KAART</span><span class="amt num">20,00</span></div>
+              <div class="qh"><span>To categorize</span><span>14</span></div>
+              <div class="qi on"><span class="ci sm none" style="box-shadow: inset 0 0 0 1.5px #fff; color:#fff"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">ALBERT HEIJN 1234</span><span class="amt num">−12,47</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">Tikkie · Bioscoop</span><span class="amt num">−12,50</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">Coffee Company</span><span class="amt num">−3,80</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">Coffee Company</span><span class="amt num">−3,80</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">NS Groep</span><span class="amt num">−23,40</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">Vattenfall</span><span class="amt num">−96,00</span></div>
+              <div class="qi"><span class="ci sm none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">S. Visser</span><span class="amt num in">+29,00</span></div>
+              <div class="qi" style="color:var(--label-3)">7 more</div>
+            </div>
+            <div class="stage-inner">
+              <div class="card">
+                <div class="head">
+                  <span class="ci lg none"><svg class="i"><use href="#i-q"/></svg></span>
+                  <div><div class="big num">€ −12,47</div><div style="font-weight:600;font-size:15px">ALBERT HEIJN 1234 AMSTERDAM</div><div class="meta">Credit card · Friday 14 November</div></div>
+                </div>
+                <div class="picks">
+                  <div class="pick top"><span class="ci sm" style="--cc:var(--green)"><svg class="i"><use href="#i-cart"/></svg></span><div><div style="font-weight:600">Groceries</div><div class="hint">Used 41× here</div></div><span class="kbd">1</span></div>
+                  <div class="pick"><span class="ci sm" style="--cc:var(--blue)"><svg class="i"><use href="#i-house"/></svg></span><span>Household</span><span class="kbd">2</span></div>
+                  <div class="pick"><span class="ci sm" style="--cc:var(--green)"><svg class="i"><use href="#i-fork"/></svg></span><span>Dining out</span><span class="kbd">3</span></div>
+                  <div class="pick"><span class="ci sm" style="--cc:var(--purple)"><svg class="i"><use href="#i-bag"/></svg></span><span>Shopping</span><span class="kbd">4</span></div>
+                  <div class="pick"><span class="ci sm" style="--cc:var(--teal)"><svg class="i"><use href="#i-tram"/></svg></span><span>Transport</span><span class="kbd">5</span></div>
+                  <div class="pick" style="color:var(--label-2)"><svg class="i"><use href="#i-search"/></svg><span>All categories</span><span class="kbd">/</span></div>
+                </div>
+                <div class="actions">
+                  <span class="btn"><svg class="i"><use href="#i-split"/></svg>Split <span class="kbd">S</span></span>
+                  <span class="btn"><svg class="i"><use href="#i-back"/></svg>Link to an Expense <span class="kbd">L</span></span>
+                  <span class="spacer"></span>
+                  <span class="btn plain">Skip <span class="kbd">J</span></span>
+                  <span class="btn plain">Undo <span class="kbd">U</span></span>
+                </div>
+              </div>
+              <div class="card">
+                <div class="head" style="justify-content:space-between"><b style="font-size:15px">Transfer between your accounts?</b><span class="meta">Opposite amounts, 2 days apart</span></div>
+                <div class="pair">
+                  <div class="side"><div class="meta">ING · Mon 17 Nov</div><div class="nm">American Express</div><div class="amt num">−1.019,66</div></div>
+                  <span class="swap"><svg class="i"><use href="#i-swap"/></svg></span>
+                  <div class="side"><div class="meta">AMEX · Wed 19 Nov</div><div class="nm">Payment received</div><div class="amt num" style="color:var(--pos)">+1.019,66</div></div>
+                </div>
+                <div class="actions"><span class="spacer"></span><span class="btn">Not a Transfer <span class="kbd">N</span></span><span class="btn primary">Link as Transfer <span class="kbd" style="background:rgba(255,255,255,.2);color:#fff;border-color:transparent">T</span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="vcard"><h3><i></i>What works</h3><ul><li>The fastest way through an import: about one keystroke per transaction.</li><li>Transfer suggestions get a clear yes or no.</li><li>The progress ring makes the chore finite.</li></ul></div>
+      <div class="vcard con"><h3><i></i>What doesn't</h3><ul><li>A workflow, not a home screen. Once the inbox is empty there's nothing to look at.</li><li>"41 times at Albert Heijn" needs a small new backend query.</li><li>"Not a Transfer" isn't stored yet, so a dismissed pair returns after a reload.</li></ul></div>
+    </div>
+    <p class="api">API: <code>ListTransactions(uncategorized_only)</code> · <code>SuggestTransfers</code> · <code>SetSplits</code> · <code>CreateGroup(transfer)</code>. Ranking quick picks by past use needs a new query.</p>
+  </section>
+
+  <!-- ===================== C · Overview ===================== -->
+  <section class="prop" id="c">
+    <div class="eyebrow">Proposal C</div>
+    <h2>Start with the month, zoom out to the year.</h2>
+    <p class="lede">The home screen answers "where did my money go?". <b>Month</b> shows net spending per category, with reimbursements already subtracted and transfers left out. <b>Year</b> plots every category month by month, so trends and one-offs like the summer holiday stand out. The switch sits in the toolbar; both modes are shown below, and both are live.</p>
+    <div class="stage">
+      <div class="window">
+        <aside class="sb">
+          <div class="lights"><i></i><i></i><i></i></div>
+          <a class="on"><svg class="i"><use href="#i-overview"/></svg>Overview</a>
+          <a><svg class="i"><use href="#i-list"/></svg>Transactions</a>
+          <a><svg class="i"><use href="#i-tray"/></svg>To Categorize<span class="attn">14</span></a>
+          <div class="h">Manage</div>
+          <a><svg class="i"><use href="#i-import"/></svg>Import</a>
+          <a><svg class="i"><use href="#i-tag"/></svg>Categories</a>
+        </aside>
+        <div class="content">
+          <div class="ov" data-mode="month">
+            <div class="ov-title">
+              <h4 class="h-month">November 2026</h4><h4 class="h-year">2026</h4>
+              <div class="stepper"><span><svg class="i"><use href="#i-left"/></svg></span><span><svg class="i"><use href="#i-right"/></svg></span></div>
+              <div class="spacer"></div>
+              <div class="seg mode" role="group" aria-label="Overview period"><button type="button" data-m="month" class="on" aria-pressed="true">Month</button><button type="button" data-m="year" aria-pressed="false">Year</button></div>
+              <span class="btn"><svg class="i"><use href="#i-import"/></svg>Import Statement</span>
+            </div>
+            <div class="ov-month">
+            <div class="summary">
+              <div><div class="l">Income</div><div class="v" style="color:var(--pos)">+3.000,00</div></div>
+              <div><div class="l">Spent</div><div class="v">−2.079,32</div></div>
+              <div><div class="l">Saved</div><div class="v">+920,68</div></div>
+              <div class="todo"><div><div class="l">To categorize · −187,30</div><div class="v">14 transactions</div></div><svg class="i chev"><use href="#i-right"/></svg></div>
+            </div>
+            <div class="ov-grid">
+              <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+                <div class="storage">
+                  <div class="row1"><b>Where it went</b><span class="num">€ 2.079,32 spent</span></div>
+                  <div class="sbar">
+                    <i style="--cc:var(--s1);flex:1246"></i><i style="--cc:var(--s2);flex:398.85"></i><i style="--cc:var(--s3);flex:134.99"></i>
+                    <i style="--cc:var(--s5);flex:64.20"></i><i style="--cc:var(--s6);flex:47.98"></i><i style="--cc:var(--s0);flex:187.30"></i>
+                  </div>
+                  <div class="legend">
+                    <span style="--cc:var(--s1)">Housing 60%</span><span style="--cc:var(--s2)">Food 19%</span><span style="--cc:var(--s3)">Shopping 6%</span>
+                    <span style="--cc:var(--s5)">Transport 3%</span><span style="--cc:var(--s6)">Subscriptions &amp; fees 2%</span><span style="--cc:var(--s0)">Uncategorized 9%</span>
+                  </div>
+                </div>
+                <div class="group cat-list">
+                  <div class="grow"><span class="ci" style="--cc:var(--blue)"><svg class="i"><use href="#i-house"/></svg></span><span class="nm">Housing</span><span class="amt num">−1.246,00</span><span class="delta">±0%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow child"><span class="nm">Rent</span><span class="amt num">−1.150,00</span><span class="delta">±0%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow child"><span class="nm">Utilities</span><span class="amt num">−96,00</span><span class="delta">±0%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci" style="--cc:var(--green)"><svg class="i"><use href="#i-cart"/></svg></span><span class="nm">Food</span><span class="amt num">−398,85</span><span class="delta up">+12%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow child"><span class="nm">Groceries</span><span class="amt num">−312,45</span><span class="delta down">−3%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow child"><div><div class="nm">Dining out</div><div class="note">203,40 spent · 117,00 paid back</div></div><span class="amt num">−86,40</span><span class="delta up">+41%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci" style="--cc:var(--purple)"><svg class="i"><use href="#i-bag"/></svg></span><span class="nm">Shopping</span><span class="amt num">−134,99</span><span class="delta down">−20%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci" style="--cc:var(--teal)"><svg class="i"><use href="#i-tram"/></svg></span><span class="nm">Transport</span><span class="amt num">−64,20</span><span class="delta up">+4%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci" style="--cc:var(--pink)"><svg class="i"><use href="#i-tv"/></svg></span><span class="nm">Subscriptions</span><span class="amt num">−27,98</span><span class="delta">±0%</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci" style="--cc:var(--pink)"><svg class="i"><use href="#i-card"/></svg></span><span class="nm">Fees</span><span class="amt num">−20,00</span><span class="delta">new</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                  <div class="grow"><span class="ci none"><svg class="i"><use href="#i-q"/></svg></span><span class="nm">Uncategorized</span><span class="amt num">−187,30</span><span class="delta" style="visibility:hidden">–</span><svg class="i chev"><use href="#i-right"/></svg></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="aside-card">
+                  <div class="glabel">Not counted</div>
+                  <div class="line"><span class="ci sm xfer"><svg class="i"><use href="#i-swap"/></svg></span>Transfers<span class="amt num">1.019,66</span></div>
+                  <p>The AMEX bill paid from ING. The purchases on the card are counted instead.</p>
+                </div>
+                <div class="aside-card">
+                  <div class="glabel">Waiting to be paid back</div>
+                  <div class="line"><span class="ci sm" style="--cc:var(--orange)"><svg class="i"><use href="#i-back"/></svg></span>Weekend Gent<span class="amt num">−240,00</span></div>
+                  <div class="meter"><i></i></div>
+                  <p>1 of 3 friends paid back so far</p>
+                </div>
+                <div class="aside-card">
+                  <div class="glabel">Income</div>
+                  <div class="line"><span class="ci sm" style="--cc:var(--indigo)"><svg class="i"><use href="#i-case"/></svg></span>Salary<span class="amt num" style="color:var(--pos)">+3.000,00</span></div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div class="ov-year">
+              <div class="summary ysum">
+                <div><div class="l">Income</div><div class="v" style="color:var(--pos)" data-f="income"></div></div>
+                <div><div class="l">Spent</div><div class="v" data-f="spent"></div></div>
+                <div><div class="l">Saved</div><div class="v" data-f="saved"></div></div>
+                <div><div class="l">Average spent per month</div><div class="v" data-f="avg"></div></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-head"><b>Spending by category per month</b><span>Net of reimbursements · transfers left out · hover a month for details</span></div>
+                <div class="ltoggles" role="group" aria-label="Categories shown in the chart"></div>
+                <div class="chart-wrap"><svg class="ychart" viewBox="0 0 880 290" role="img"></svg><div class="tip" hidden></div></div>
+              </div>
+              <div class="ytable-wrap"><table class="ytable"><caption>Spent per month in euros. Click a category to plot it alone.</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="vcard"><h3><i></i>What works</h3><ul><li>Shows what the data model was built for: the net cost per category, with the AMEX bill counted once.</li><li>"203,40 spent · 117,00 paid back" makes the Tikkie netting visible and easy to trust.</li><li>The orange "To categorize" cell leads straight to the work.</li><li>Year mode shows each category over time; the legend turns categories on and off, so you can drop Housing to see the smaller ones.</li></ul></div>
+      <div class="vcard con"><h3><i></i>What doesn't</h3><ul><li>Read-only: you still need A or B to fix anything.</li><li>"Spent / paid back" per category and "Waiting to be paid back" need small report additions.</li></ul></div>
+    </div>
+    <p class="api">API: <code>CategoryTotals(from, to)</code> for this month and last, or for the whole year (it already returns one row per month and category) · parent totals summed in the frontend from <code>ListCategories</code> · a row opens A filtered by <code>category_id</code> and month.</p>
+  </section>
+
+  <!-- ===================== Sheets ===================== -->
+  <section class="prop" id="sheets">
+    <div class="eyebrow">Shared</div>
+    <h2>Sheets that work with any layout.</h2>
+    <p class="lede">Import, linking, splitting and categories behave the same whichever main screen we pick.</p>
+    <div class="sheets">
+      <div class="sheet">
+        <h3>Import Statement</h3>
+        <p class="sub">The bank is recognised from the file's header row.</p>
+        <div class="drop"><svg class="i"><use href="#i-doc"/></svg>Drop an ING or AMEX export here</div>
+        <div class="file"><span class="badge">CSV</span><div style="min-width:0"><div style="font-weight:600">ING export</div><div class="meta">540 rows · 1 Jan – 21 Nov 2026</div></div>
+          <span class="popup">ING Betaalrekening<svg class="i"><use href="#i-updown"/></svg></span></div>
+        <div class="stats"><div><b class="pos">27</b><span>new transactions</span></div><div><b>787</b><span>already imported</span></div></div>
+        <div class="foot"><span class="btn">Undo Import</span><span class="btn primary">Review 27 New</span></div>
+      </div>
+
+      <div class="sheet">
+        <h3>Link Payments Back</h3>
+        <p class="sub">Restaurant De Kas · −116,00 · Sat 15 Nov</p>
+        <div class="field ph"><svg class="i"><use href="#i-search"/></svg>Incoming payments in the next 3 weeks</div>
+        <div class="cands">
+          <div class="cand"><span class="check on"><svg class="i"><use href="#i-check"/></svg></span><div><div class="nm">J. de Vries</div><div class="meta">Tripel date eten · 16 Nov</div></div><span class="amt num">+29,00</span></div>
+          <div class="cand"><span class="check on"><svg class="i"><use href="#i-check"/></svg></span><div><div class="nm">M. Bakker</div><div class="meta">tripel date · 16 Nov</div></div><span class="amt num">+29,00</span></div>
+          <div class="cand"><span class="check on"><svg class="i"><use href="#i-check"/></svg></span><div><div class="nm">S. Visser</div><div class="meta">eten zaterdag · 18 Nov</div></div><span class="amt num">+29,00</span></div>
+          <div class="cand"><span class="check"></span><div><div class="nm">K. Smit</div><div class="meta">bioscoop · 20 Nov</div></div><span class="amt num">+12,50</span></div>
+        </div>
+        <div class="net"><span>Your share</span><span class="num">−29,00</span></div>
+        <div class="field">Tripel date eten</div>
+        <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Link 3 Payments</span></div>
+      </div>
+
+      <div class="sheet">
+        <h3>Split Transaction</h3>
+        <p class="sub">Action · −27,85 · Fri 14 Nov</p>
+        <div class="srow"><div class="field" style="flex:1"><span class="ci sm" style="--cc:var(--blue)"><svg class="i"><use href="#i-house"/></svg></span>Household</div><div class="field money">−19,50</div></div>
+        <div class="srow"><div class="field" style="flex:1"><span class="ci sm" style="--cc:var(--green)"><svg class="i"><use href="#i-cart"/></svg></span>Groceries</div><div class="field money">−8,35</div></div>
+        <div class="remaining"><span class="btn plain"><svg class="i"><use href="#i-plus"/></svg>Add Category</span><span>Remaining <b class="num">0,00</b></span></div>
+        <p class="sub" style="margin:0;text-align:left">The last row fills itself with whatever remains, so a split always adds up.</p>
+        <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Save Split</span></div>
+      </div>
+
+      <div class="sheet">
+        <h3>Categories</h3>
+        <p class="sub">Rename in place, drag to move. A category in use can't be deleted.</p>
+        <div class="tree">
+          <div class="grow"><span class="disc">▼</span><span class="ci sm" style="--cc:var(--blue)"><svg class="i"><use href="#i-house"/></svg></span>Housing<span class="v">Expense</span></div>
+          <div class="grow child">Rent<span class="v num">11</span></div>
+          <div class="grow child">Utilities<span class="v num">22</span></div>
+          <div class="grow"><span class="disc">▼</span><span class="ci sm" style="--cc:var(--green)"><svg class="i"><use href="#i-cart"/></svg></span>Food<span class="v">Expense</span></div>
+          <div class="grow child">Groceries<span class="v num">164</span></div>
+          <div class="grow child">Dining out<span class="v num">38</span></div>
+          <div class="grow"><span class="disc">▶</span><span class="ci sm" style="--cc:var(--indigo)"><svg class="i"><use href="#i-case"/></svg></span>Salary<span class="v">Income</span></div>
+        </div>
+        <div class="foot" style="justify-content:flex-start"><span class="btn plain"><svg class="i"><use href="#i-plus"/></svg>New Category</span></div>
+      </div>
+    </div>
+    <p class="api">API: <code>ImportFile</code>, <code>UndoBatch</code> · <code>ListTransactions(date range)</code> for candidates, then <code>CreateGroup(reimbursement)</code> · <code>SetSplits</code> · <code>ListCategories</code>, <code>CreateCategory</code>, <code>UpdateCategory</code>, <code>DeleteCategory</code>. Recognising the bank is a header check in the frontend.</p>
+  </section>
+
+  <!-- ===================== Recommendation ===================== -->
+  <section class="prop" id="rec">
+    <div class="eyebrow">Recommendation</div>
+    <h2>Use all three, each for its own moment.</h2>
+    <p class="lede">C for looking, B for working through an import, A for finding and fixing. Together they're the v1.</p>
+    <div class="recs">
+      <div class="rcard"><div class="ic" style="--cc:var(--blue)"><svg class="i"><use href="#i-layers"/></svg></div><h3>Screens</h3><ol>
+        <li><b>Overview</b> (C) is the home page.</li>
+        <li><b>Transactions</b> (A) with the inspector. A category in the overview opens it, filtered.</li>
+        <li><b>To Categorize</b>: B's one-at-a-time mode over the same list, transfers first. Quick picks start as your recent categories.</li>
+        <li><b>Import</b> and <b>Categories</b> as the sheets above.</li>
+      </ol></div>
+      <div class="rcard"><div class="ic" style="--cc:var(--green)"><svg class="i"><use href="#i-hammer"/></svg></div><h3>Build order</h3><ol>
+        <li>Import and the transaction list, so you can see your data.</li>
+        <li>Inspector: categories, splits, notes.</li>
+        <li>Linking: transfer suggestions and Link Payments Back.</li>
+        <li>Overview.</li>
+        <li>Inbox mode.</li>
+      </ol></div>
+      <div class="rcard"><div class="ic" style="--cc:var(--purple)"><svg class="i"><use href="#i-sparkle"/></svg></div><h3>Stack</h3><ul>
+        <li>Vite, React and TypeScript in <code>web/</code>.</li>
+        <li><code>buf generate</code> with <code>protoc-gen-es</code> for typed clients; <code>connect-web</code> over gRPC-web with <code>connect-query</code> for caching.</li>
+        <li>TanStack Router keeps the month and filters in the URL, so every view can be bookmarked.</li>
+        <li>Plain CSS with these tokens; Radix only for sheets, popovers and the category picker.</li>
+        <li>Served by <code>tally-server</code> from the same origin; a Vite proxy in development.</li>
+      </ul></div>
+    </div>
+
+    <div class="needs">
+      <div class="nrow hd"><span>What the mockups need</span><span>Status</span><span>Proposal</span></div>
+      <div class="nrow"><span>Year mode: categories over time</span><span class="status ok">Supported</span><span><code>CategoryTotals</code> for the year already returns month × category rows; the frontend groups them by top-level category.</span></div>
+      <div class="nrow"><span>Everything in A, the sheets, basic C</span><span class="status ok">Supported</span><span>No backend change.</span></div>
+      <div class="nrow"><span>Recognising the bank on import</span><span class="status ok">Frontend</span><span>Read the header row and pick <code>ing_csv</code> or <code>amex_csv</code>.</span></div>
+      <div class="nrow"><span>Spent · paid back per category</span><span class="status miss">Missing</span><span>Add <code>spent_cents</code> and <code>reimbursed_cents</code> to <code>CategoryTotal</code>, a small change to the report query. Optional for v1.</span></div>
+      <div class="nrow"><span>Waiting to be paid back</span><span class="status later">Deferred</span><span>Needs an expected amount per group to know what's still open; that's on the deferred list.</span></div>
+      <div class="nrow"><span>Quick picks ranked by past use</span><span class="status later">Deferred</span><span>Start with recent categories. Ranking by counterparty is the first step toward rules.</span></div>
+      <div class="nrow"><span>Remembering "Not a Transfer"</span><span class="status later">Deferred</span><span>One false positive in your data, so dismissing for the session is enough at first.</span></div>
+    </div>
+  </section>
+</div>
+<script>
+  // ---------- Overview: Month | Year ----------
+  // Example data for 2026, net spending per top-level category (what CategoryTotals returns, grouped by parent).
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const NOW = 10; // November: the last month with data
+  const SERIES = [
+    { name: "Housing", color: "var(--s1)", data: [1292, 1288, 1271, 1254, 1238, 1229, 1226, 1228, 1235, 1242, 1246] },
+    { name: "Food", color: "var(--s2)", data: [341.20, 362.75, 388.10, 405.30, 446.90, 472.15, 298.40, 334.60, 412.85, 356.10, 398.85] },
+    { name: "Shopping", color: "var(--s3)", data: [212.40, 64.90, 98.50, 156.20, 87.35, 245.80, 72.10, 118.60, 189.99, 168.74, 134.99] },
+    { name: "Travel", color: "var(--s4)", data: [0, 0, 186.00, 0, 92.40, 0, 1240.00, 386.50, 0, 240.00, 0] },
+    { name: "Transport", color: "var(--s5)", data: [58.40, 72.30, 66.10, 81.20, 54.80, 49.60, 38.20, 44.90, 77.60, 61.75, 64.20] },
+    { name: "Subscriptions & fees", color: "var(--s6)", data: [27.98, 27.98, 27.98, 27.98, 27.98, 27.98, 27.98, 27.98, 27.98, 27.98, 47.98] },
+    { name: "Uncategorized", color: "var(--s0)", data: [0, 0, 0, 12.50, 0, 8.40, 0, 23.10, 0, 64.30, 187.30] },
+  ];
+  const INCOME = [3000, 3000, 3000, 3000, 5400, 3000, 3000, 3000, 3000, 3000, 3000]; // May includes holiday allowance
+  const nf2 = new Intl.NumberFormat("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const nf0 = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 0 });
+  const money = (v, plus) => (v < 0 ? "\u2212" : plus && v > 0 ? "+" : "") + nf2.format(Math.abs(v));
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const svgEl = (tag, attrs = {}, text) => {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (text != null) e.textContent = text;
+    return e;
+  };
+  const niceStep = (max) => [100, 200, 250, 500, 1000, 2000, 2500, 5000].find((s) => max / s <= 4) || 10000;
+
+  function setupOverview(ov) {
+    const hidden = new Set();
+    const svg = ov.querySelector(".ychart");
+    const tip = ov.querySelector(".tip");
+    const toggles = ov.querySelector(".ltoggles");
+    const table = ov.querySelector(".ytable");
+
+    for (const b of ov.querySelectorAll(".mode button")) b.addEventListener("click", () => setMode(b.dataset.m));
+    function setMode(m) {
+      ov.dataset.mode = m;
+      for (const b of ov.querySelectorAll(".mode button")) {
+        b.classList.toggle("on", b.dataset.m === m);
+        b.setAttribute("aria-pressed", String(b.dataset.m === m));
+      }
+    }
+    setMode(ov.dataset.mode);
+
+    const spent = sum(SERIES.map((s) => sum(s.data)));
+    const income = sum(INCOME);
+    const fill = (f, text) => { ov.querySelector(`[data-f="${f}"]`).textContent = text; };
+    fill("income", money(income, true));
+    fill("spent", money(-spent));
+    fill("saved", money(income - spent, true));
+    fill("avg", money(-spent / (NOW + 1)));
+
+    // Table view: the chart's twin, every value readable without hovering.
+    const head = document.createElement("tr");
+    for (const t of ["Category", ...MONTHS, "2026", "Per month"]) head.append(Object.assign(document.createElement("th"), { textContent: t }));
+    table.tHead.append(head);
+    const rows = SERIES.map((s, i) => {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td");
+      const key = document.createElement("span");
+      key.className = "key";
+      key.style.setProperty("--k", s.color);
+      name.append(key, document.createTextNode(s.name));
+      tr.append(name);
+      MONTHS.forEach((_, m) => {
+        const td = document.createElement("td");
+        if (m > NOW) { td.textContent = "\u2013"; td.className = "future"; }
+        else td.textContent = s.data[m] ? nf0.format(s.data[m]) : "\u2013";
+        tr.append(td);
+      });
+      tr.append(Object.assign(document.createElement("td"), { textContent: nf0.format(sum(s.data)), className: "sum" }));
+      tr.append(Object.assign(document.createElement("td"), { textContent: nf0.format(sum(s.data) / (NOW + 1)) }));
+      tr.addEventListener("click", () => solo(i));
+      table.tBodies[0].append(tr);
+      return tr;
+    });
+    const foot = document.createElement("tr");
+    foot.append(Object.assign(document.createElement("td"), { textContent: "Total" }));
+    MONTHS.forEach((_, m) => foot.append(Object.assign(document.createElement("td"), {
+      textContent: m > NOW ? "\u2013" : nf0.format(sum(SERIES.map((s) => s.data[m]))), className: m > NOW ? "future" : "" })));
+    foot.append(Object.assign(document.createElement("td"), { textContent: nf0.format(spent) }));
+    foot.append(Object.assign(document.createElement("td"), { textContent: nf0.format(spent / (NOW + 1)) }));
+    table.tFoot.append(foot);
+
+    function solo(i) {
+      const alone = hidden.size === SERIES.length - 1 && !hidden.has(i);
+      hidden.clear();
+      if (!alone) SERIES.forEach((_, j) => j !== i && hidden.add(j));
+      render();
+    }
+
+    function renderToggles() {
+      toggles.replaceChildren();
+      SERIES.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("aria-pressed", String(!hidden.has(i)));
+        b.style.setProperty("--k", s.color);
+        b.append(document.createElement("i"), document.createTextNode(s.name));
+        b.addEventListener("click", () => {
+          hidden.has(i) ? hidden.delete(i) : hidden.add(i);
+          if (hidden.size === SERIES.length) hidden.delete(i); // keep at least one
+          render();
+        });
+        toggles.append(b);
+      });
+      if (hidden.size) {
+        const r = Object.assign(document.createElement("button"), { type: "button", className: "reset", textContent: "Show all" });
+        r.addEventListener("click", () => { hidden.clear(); render(); });
+        toggles.append(r);
+      }
+      rows.forEach((tr, i) => tr.classList.toggle("off", hidden.has(i)));
+    }
+
+    function renderChart() {
+      const W = 880, H = 290, L = 46, R = 6, T = 22, B = 26;
+      const plotH = H - T - B, band = (W - L - R) / 12, barW = 24;
+      const visible = SERIES.map((s, i) => ({ ...s, i })).filter((s) => !hidden.has(s.i));
+      const totals = MONTHS.map((_, m) => (m > NOW ? 0 : sum(visible.map((s) => s.data[m]))));
+      const max = Math.max(...totals);
+      const step = niceStep(max), top = Math.max(step, Math.ceil(max / step) * step);
+      const y = (v) => T + plotH - (v / top) * plotH;
+      svg.replaceChildren();
+      svg.setAttribute("aria-label", `Spending per month in 2026 by category, ${visible.map((s) => s.name).join(", ")}. Values are in the table below.`);
+
+      for (let v = 0; v <= top; v += step) {
+        svg.append(svgEl("line", { class: "grid", x1: L, x2: W - R, y1: y(v), y2: y(v) }));
+        svg.append(svgEl("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, nf0.format(v)));
+      }
+      const peak = totals.indexOf(max);
+      MONTHS.forEach((mName, m) => {
+        const cx = L + band * m + band / 2;
+        svg.append(svgEl("text", { class: "mlabel" + (m === NOW ? " now" : m > NOW ? " future" : ""), x: cx, y: H - 8, "text-anchor": "middle" }, mName));
+        if (m > NOW) return;
+        const g = svgEl("g", { class: "col" });
+        const segs = visible.filter((s) => s.data[m] > 0);
+        let cum = 0;
+        segs.forEach((s, k) => {
+          const isTop = k === segs.length - 1, isBottom = k === 0;
+          const y0 = y(cum) - (isBottom ? 0 : 1);
+          cum += s.data[m];
+          const y1 = y(cum) + (isTop ? 0 : 1);
+          const h = y0 - y1;
+          if (h < 1) return; // too thin to draw; the tooltip and table carry it
+          const x = cx - barW / 2, r = isTop ? Math.min(4, h) : 0;
+          const d = `M${x} ${y0}V${y1 + r}Q${x} ${y1} ${x + r} ${y1}H${x + barW - r}Q${x + barW} ${y1} ${x + barW} ${y1 + r}V${y0}Z`;
+          const path = svgEl("path", { d });
+          path.style.fill = s.color;
+          g.append(path);
+        });
+        svg.append(g);
+        if (m === NOW || m === peak) {
+          svg.append(svgEl("text", { class: "cap", x: cx, y: y(totals[m]) - 7, "text-anchor": "middle" }, nf0.format(totals[m])));
+        }
+        const hit = svgEl("rect", { class: "hit", x: cx - band / 2, y: T - 14, width: band, height: plotH + 14, tabindex: 0,
+          "aria-label": `${MONTHS_LONG[m]}: ${money(-totals[m])} spent` });
+        const show = () => {
+          svg.classList.add("focus");
+          g.classList.add("hl");
+          tip.replaceChildren();
+          const t = document.createElement("div");
+          t.className = "t";
+          t.append(document.createTextNode(MONTHS_LONG[m] + " 2026"), Object.assign(document.createElement("b"), { textContent: money(-totals[m]) }));
+          tip.append(t);
+          for (const s of [...visible].reverse()) {
+            const r = document.createElement("div");
+            r.className = "r";
+            const k = document.createElement("i");
+            k.style.setProperty("--k", s.color);
+            r.append(k, Object.assign(document.createElement("b"), { textContent: s.data[m] ? nf2.format(s.data[m]) : "\u2013" }),
+              Object.assign(document.createElement("span"), { textContent: s.name }));
+            tip.append(r);
+          }
+          tip.hidden = false;
+          const scale = svg.getBoundingClientRect().width / W;
+          const px = cx * scale, wrapW = svg.getBoundingClientRect().width;
+          tip.style.left = (px + 22 + tip.offsetWidth > wrapW ? px - 22 - tip.offsetWidth : px + 22) + "px";
+        };
+        const hide = () => { svg.classList.remove("focus"); g.classList.remove("hl"); tip.hidden = true; };
+        hit.addEventListener("pointerenter", show);
+        hit.addEventListener("pointerleave", hide);
+        hit.addEventListener("focus", show);
+        hit.addEventListener("blur", hide);
+        svg.append(hit);
+      });
+    }
+
+    function render() { renderToggles(); renderChart(); }
+    render();
+  }
+
+  // Show the overview window twice: once in each mode. Both copies are fully interactive.
+  const ovStage = document.querySelector("#c .stage");
+  const yearStage = ovStage.cloneNode(true);
+  yearStage.querySelector(".ov").dataset.mode = "year";
+  ovStage.after(yearStage);
+  document.querySelectorAll("#c .ov").forEach(setupOverview);
+
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+</script>
+</body>
+</html>

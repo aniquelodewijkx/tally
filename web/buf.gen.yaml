@@ -1,0 +1,8 @@
+# Generates typed protobuf messages and service descriptors into src/gen (checked in).
+# Run with `npm run generate` from web/ (needs buf on PATH; devenv provides it).
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-es
+    out: src/gen
+    opt: target=ts

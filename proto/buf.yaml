@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: .
+lint:
+  use:
+    - STANDARD
+  except:
+    # Frontend and backend ship together from this repo, so there are no old clients to keep
+    # working through a breaking change. Compatible evolution is handled by protobuf itself
+    # (new fields, never reusing field numbers once a frontend uses them).
+    - PACKAGE_VERSION_SUFFIX

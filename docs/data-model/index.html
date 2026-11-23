@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally Data Model</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f0efeb; --text: #1d1d1b; --muted: #6b6a65;
+    --border: #e2e0da; --accent: #2f6f5e; --code-bg: #f3f2ee;
+    --d-import: #3b6fb6; --d-ledger: #2f6f5e; --d-group: #b5562f; --d-class: #7a4fb0;
+    --pk: #9a6b00; --fk: #2d64a8; --uq: #7a4fb0;
+    --edge: #8f8d86; --border-strong: #cfccc4;
+    --neg: #b3261e; --pos: #1e7a46;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1f1f1d; --surface-2: #2a2a27; --text: #ecebe6; --muted: #a3a29b;
+      --border: #3a3935; --accent: #6fc2a8; --code-bg: #262624;
+      --d-import: #7aa7e6; --d-ledger: #6fc2a8; --d-group: #e8946d; --d-class: #b99ae6;
+      --pk: #e2b54a; --fk: #7aa7e6; --uq: #b99ae6;
+      --edge: #7d7b74; --border-strong: #4a4944;
+      --neg: #f2867c; --pos: #7fd6a0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1f1f1d; --surface-2: #2a2a27; --text: #ecebe6; --muted: #a3a29b;
+    --border: #3a3935; --accent: #6fc2a8; --code-bg: #262624;
+    --d-import: #7aa7e6; --d-ledger: #6fc2a8; --d-group: #e8946d; --d-class: #b99ae6;
+    --pk: #e2b54a; --fk: #7aa7e6; --uq: #b99ae6;
+    --edge: #7d7b74; --border-strong: #4a4944;
+    --neg: #f2867c; --pos: #7fd6a0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  code, pre, .mono { font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace; font-size: 0.88em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  header h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); }
+  nav.toc { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--border);
+    margin: 20px -16px 0; padding: 10px 16px; display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 14px; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--text); }
+  h2 { font-size: 21px; margin: 44px 0 12px; scroll-margin-top: 56px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 8px 0; }
+  .lede { color: var(--muted); max-width: 820px; }
+  .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 14px; }
+  .principle { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .principle b { display: block; margin-bottom: 4px; }
+  .principle span { color: var(--muted); font-size: 14px; }
+  .diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; overflow-x: auto; }
+  .legend { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  #er-svg { display: block; width: 100%; max-width: 1030px; min-width: 820px; height: auto; margin: 0 auto; }
+  .er-body { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1; }
+  .er-title { font: 600 12.5px ui-monospace, Menlo, monospace; fill: var(--text); }
+  .er-col { font: 11px ui-monospace, Menlo, monospace; fill: var(--text); }
+  .er-type { font: 11px ui-monospace, Menlo, monospace; fill: var(--muted); }
+  .er-badge { font: 600 9.5px ui-monospace, Menlo, monospace; }
+  .er-sep { stroke: var(--border); stroke-width: 1; }
+  .er-edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .15s; }
+  .er-edge.opt { stroke-dasharray: 5 4; }
+  .er-edge.hl { stroke: var(--accent); stroke-width: 2.2; }
+  .er-marker { fill: none; stroke: var(--edge); stroke-width: 1.4; }
+  .er-marker.hl { stroke: var(--accent); stroke-width: 1.8; }
+  .er-box { cursor: pointer; transition: opacity .15s; }
+  svg.focus .er-edge:not(.hl) { opacity: .12; }
+  svg.focus .er-box:not(.hl) { opacity: .4; }
+
+  #pipe-svg { display: block; width: 100%; max-width: 820px; min-width: 640px; height: auto; margin: 0 auto; }
+  .pf-node { fill: var(--surface); stroke: var(--border-strong); }
+  .pf-node.decision { fill: color-mix(in srgb, var(--pk) 12%, var(--surface)); stroke: color-mix(in srgb, var(--pk) 55%, var(--surface)); }
+  .pf-node.outcome { fill: var(--surface-2); stroke: var(--border-strong); stroke-dasharray: 4 3; }
+  .pf-node.good { fill: color-mix(in srgb, var(--accent) 14%, var(--surface)); stroke: color-mix(in srgb, var(--accent) 60%, var(--surface)); stroke-dasharray: none; }
+  .pf-title { font: 600 12.5px ui-sans-serif, system-ui, sans-serif; fill: var(--text); }
+  .pf-sub { font: 11px ui-monospace, Menlo, monospace; fill: var(--muted); }
+  .pf-edge { fill: none; stroke: var(--edge); stroke-width: 1.4; }
+  .pf-arrow { fill: var(--edge); }
+  .pf-edge.dash { stroke-dasharray: 5 4; }
+  #deps-svg { display: block; width: 100%; max-width: 860px; min-width: 680px; height: auto; margin: 0 auto; }
+  .pf-label { font: 600 10.5px ui-sans-serif, system-ui, sans-serif; fill: var(--muted); }
+
+  .domain-head { display: flex; align-items: center; gap: 10px; margin: 36px 0 4px; scroll-margin-top: 56px; }
+  .domain-head h2 { margin: 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 14px; margin-top: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--dc); border-radius: 10px;
+    padding: 14px 16px 12px; scroll-margin-top: 60px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; }
+  .card .purpose { color: var(--muted); font-size: 14px; margin: 2px 0 10px; }
+  .tbl-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+    border-bottom: 1px solid var(--border); padding: 4px 8px 6px 0; }
+  td { border-bottom: 1px solid var(--border); padding: 6px 8px 6px 0; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.col { font-family: ui-monospace, Menlo, monospace; white-space: nowrap; }
+  td.type { font-family: ui-monospace, Menlo, monospace; color: var(--muted); white-space: nowrap; }
+  .null { color: var(--muted); font-size: 11px; margin-left: 4px; }
+  .badge { display: inline-block; font: 600 10.5px/1 ui-monospace, Menlo, monospace; padding: 3px 5px; border-radius: 4px;
+    margin-left: 6px; vertical-align: 1px; border: 1px solid currentColor; }
+  .badge.pk { color: var(--pk); } .badge.fk { color: var(--fk); } .badge.uq { color: var(--uq); }
+  .fk-link { color: var(--fk); text-decoration: none; font-size: 12px; }
+  .constraints { margin: 10px 0 0; padding: 8px 10px; background: var(--surface-2); border-radius: 8px; font-size: 13px; }
+  .constraints ul { margin: 0; padding-left: 18px; }
+  .scenario { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 14px; }
+  .scenario h3 { margin-top: 0; }
+  .scenario table td, .scenario table th { padding-right: 14px; }
+  .amt { font-family: ui-monospace, Menlo, monospace; text-align: right; white-space: nowrap; }
+  .neg { color: var(--neg); } .pos { color: var(--pos); }
+  .result { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 14px; }
+  pre.code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
+  .rules td:first-child { font-weight: 600; white-space: nowrap; }
+  ul.open li { margin: 6px 0; }
+  .deferred td:first-child { font-family: ui-monospace, Menlo, monospace; white-space: nowrap; }
+  .deferred td:last-child { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Tally: data model</h1>
+    <p>v7 (implemented): 7 tables · single user · SeaORM on Postgres only · sources: ING and AMEX CSV, checked against real exports</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#rules">Rules</a>
+    <a href="#pots">Pots</a>
+    <a href="#changes">What changed</a>
+    <a href="#principles">Principles</a>
+    <a href="#er">ER diagram</a>
+    <a href="#pipeline">Import</a>
+    <a href="#tables">Tables</a>
+    <a href="#scenarios">Scenarios</a>
+    <a href="#reporting">Reporting rules</a>
+    <a href="#deferred">Deferred</a>
+    <a href="#backend">Backend structure</a>
+    <a href="#open">Open questions</a>
+  </nav>
+
+  <h2 id="rules">New in v7: auto-label rules</h2>
+  <p class="lede">A <code>rules</code> table ("counterparty contains <i>pattern</i> → category", or "→ transfer to a pot") and a <code>rule_id</code> on <code>transaction_splits</code> and <code>link_groups</code> that records which rule set a label or made a transfer. Rules only fill transactions without a category that aren't in a link group; they run on import and when a rule is created; the longest pattern wins. Full design: <a href="../auto-label/index.html">auto-label proposal</a>.</p>
+
+  <h2 id="pots">New in v6: savings pots</h2>
+  <p class="lede">Money you keep outside the accounts you import, such as savings or cash, lives in a <b>pot</b>: an ordinary account you never import. One nullable column links a one-sided transfer to it.</p>
+  <div class="scenario">
+    <pre class="code">ALTER TABLE link_groups
+  ADD COLUMN counter_account_id bigint REFERENCES accounts (id) ON DELETE RESTRICT,
+  ADD CONSTRAINT link_groups_counter_account_transfer_only
+    CHECK (counter_account_id IS NULL OR kind = 'transfer');</pre>
+    <div class="tbl-wrap"><table>
+      <tr><th>transaction</th><th>account</th><th>date</th><th class="amt">amount</th><th>link_group_id</th><th>link group</th></tr>
+      <tr><td class="mono">#812</td><td>ING</td><td>2026-11-03</td><td class="amt neg">−1.000,00</td><td class="mono">57</td><td><code>{kind: transfer, counter_account_id: 3}</code></td></tr>
+      <tr><td class="mono">#845</td><td>ING</td><td>2026-11-19</td><td class="amt pos">+700,00</td><td class="mono">58</td><td><code>{kind: transfer, counter_account_id: 3}</code></td></tr>
+      <tr><td class="mono">#861</td><td>ING</td><td>2026-11-20</td><td class="amt neg">−200,00</td><td class="mono">59</td><td><code>{kind: transfer, counter_account_id: 4}</code></td></tr>
+    </table></div>
+    <p><code>accounts #3 "Savings"</code> and <code>#4 "Cash savings"</code> have no import batches; that alone makes them pots, so there's no flag.</p>
+    <div class="result">Savings shows <b class="pos">+300,00</b> moved in (deposit 1.000, withdrawal 700), Cash savings +200,00. Nothing is spending or income. Rules: only a transfer with exactly one member may name its other side, and it must be a different account. When the real other side is linked later (say you start importing the savings account), the group gets two members and <code>counter_account_id</code> is cleared. A pot's total is what moved since tracking started, not its full balance.</div>
+  </div>
+
+  <h2 id="changes">What changed in v5: simplicity review</h2>
+  <p class="lede">An adversarial review looked for anything we don't need yet. Everything removed here can come back through a migration or a compatible proto field; see <a href="#deferred">Deferred</a>.</p>
+  <div class="scenario"><table class="rules">
+    <tr><td>Parsers</td><td>Each accepts exactly the real export format: ING in English, comma-separated, <code>YYYYMMDD</code>; AMEX <code>Datum,Omschrijving,Bedrag</code> with <b>month-first</b> dates. No header aliases, delimiter guessing or encoding fallback. Both real files import completely.</td></tr>
+    <tr><td>No adapter trait</td><td>Two plain <code>parse(&amp;[u8])</code> functions; core picks one by source id. Each parser writes its own full key, <code>ing_csv:v1:…</code>.</td></tr>
+    <tr><td>Removed</td><td><code>accounts.kind</code>, <code>transactions.updated_at</code>, manual transactions (so <code>import_batch_id</code> is required), the Tikkie suggester (reimbursements are linked by hand), pagination, the key-version guard, orphan-group cleanup on undo, down migrations, CORS, the <code>ListSources</code> RPC.</td></tr>
+    <tr><td>Kept</td><td>Splits and default reimbursement splits, the transfer suggester (on real data: every credit-card bill payment, plus the odd false positive), group rules, the report query, idempotent imports.</td></tr>
+  </table></div>
+
+  <h2 id="principles">Design principles</h2>
+  <p class="lede">Only what the first version needs: import ING and AMEX without duplicates, categorize, and link transfers and Tikkies.
+  Everything else is listed under <a href="#deferred">Deferred</a>, with the moment we'd add it through a migration.</p>
+  <div class="principles">
+    <div class="principle"><b>One row per real movement</b><span>A <code>transaction</code> is exactly one line from a bank or card statement. Its amount is signed from that account's point of view.</span></div>
+    <div class="principle"><b>Groups give meaning</b><span>A transaction can point to one <code>link_group</code> (<code>transfer</code> or <code>reimbursement</code>). The sign of the amount gives the role, so no join table is needed.</span></div>
+    <div class="principle"><b>Idempotent with one key</b><span>Unique <code>(account_id, import_key)</code> on transactions, plus a file hash on <code>import_batches</code>. Each parser builds its own versioned key. Each import runs in one DB transaction: all or nothing.</span></div>
+    <div class="principle"><b>Categories live on splits</b><span>A transaction gets its category through one or more <code>transaction_splits</code> that add up to its amount. A transaction with no splits is uncategorized.</span></div>
+    <div class="principle"><b>Keep the raw row</b><span>Each transaction stores its original source row as <code>jsonb</code>. Nothing we don't parse yet (FX, balance-after) is lost, and we can backfill new columns later.</span></div>
+  </div>
+
+  <h2 id="er">Entity relationships</h2>
+  <div class="diagram"><svg id="er-svg" role="img" aria-label="Entity relationship diagram"></svg></div>
+  <div class="legend">
+    <span><i style="background:var(--d-ledger)"></i>Ledger</span>
+    <span><i style="background:var(--d-import)"></i>Import</span>
+    <span><i style="background:var(--d-group)"></i>Grouping</span>
+    <span><i style="background:var(--d-class)"></i>Classification</span>
+    <span>Crow's foot = many, bar = one. Dashed edge and <code>?</code> = nullable. The diagram shows the main columns only.</span>
+    <span>Hover a table to highlight its relations. Click it to jump to its columns.</span>
+  </div>
+
+  <h2 id="pipeline">Import flow and parser interface</h2>
+  <p class="lede">Each source is one function from file bytes to normalized rows. Everything after parsing is shared. A trait comes back when the aggregator API arrives.</p>
+  <div class="diagram"><svg id="pipe-svg" role="img" aria-label="Import flow"></svg></div>
+  <pre class="code">pub struct NormalizedMutation {             // the account comes from the upload, not the row
+    pub key: String,                         // "{parser}:v{n}:{key}", stable across overlapping exports
+    pub booked_on: jiff::civil::Date,
+    pub amount_cents: i64,                   // signed cents from this account's view
+    pub counterparty_name: Option&lt;String&gt;,
+    pub counterparty_iban: Option&lt;String&gt;,
+    pub description: String,
+    pub raw: serde_json::Value,              // the original row
+}
+
+pub fn ing_csv::parse(bytes: &amp;[u8]) -&gt; Result&lt;Vec&lt;NormalizedMutation&gt;, SourceError&gt;;
+pub fn amex_csv::parse(bytes: &amp;[u8]) -&gt; Result&lt;Vec&lt;NormalizedMutation&gt;, SourceError&gt;;
+
+// Key recipes (identical rows within one file get "#1", "#2", ...: both real exports have one):
+//   ing_csv:v1:  sha256(date | amount | counterparty IBAN | name | notifications)
+//                card payments carry a terminal and transaction id in the notifications
+//   amex_csv:v1: sha256(date | amount | description); the export has no reference column</pre>
+
+  <div id="tables"></div>
+
+  <h2 id="scenarios">Scenarios</h2>
+
+  <div class="scenario">
+    <h3>1 · ING pays the AMEX bill (transfer)</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>transaction</th><th>account</th><th>date</th><th>counterparty</th><th class="amt">amount</th><th>link_group_id</th><th>splits</th></tr>
+      <tr><td class="mono">#501</td><td>ING Betaalrekening</td><td>2026-11-05</td><td>American Express (incasso)</td><td class="amt neg">−842.17</td><td class="mono">12</td><td>none</td></tr>
+      <tr><td class="mono">#733</td><td>Credit card</td><td>2026-11-06</td><td>Payment received</td><td class="amt pos">+842.17</td><td class="mono">12</td><td>none</td></tr>
+    </table></div>
+    <p><code>link_groups #12 {kind: transfer}</code>. The transfer suggester <em>suggests</em> the pair (opposite amounts on two of your accounts within 5 days). Suggestions are computed on the fly, and a group row is only written when you confirm.</p>
+    <div class="result">Neither row counts as an expense or income, and the backend refuses splits on transfer members. The AMEX purchases are the actual expenses. A transfer group with one member is allowed, for when the other side is an account you don't track.</div>
+  </div>
+
+  <div class="scenario">
+    <h3>2 · Dinner for 5, paid by you, Tikkies afterwards (reimbursement)</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>transaction</th><th>date</th><th>counterparty</th><th class="amt">amount</th><th>link_group_id</th><th>split</th></tr>
+      <tr><td class="mono">#900</td><td>2026-11-14</td><td>Restaurant De Kas</td><td class="amt neg">−150.00</td><td class="mono">40</td><td>Food › Dining out <span class="neg mono">−150.00</span></td></tr>
+      <tr><td class="mono">#905</td><td>2026-11-15</td><td>Tikkie · Anna</td><td class="amt pos">+30.00</td><td class="mono">40</td><td>Food › Dining out <span class="pos mono">+30.00</span> <span class="null">auto</span></td></tr>
+      <tr><td class="mono">#906</td><td>2026-11-15</td><td>Tikkie · Bram</td><td class="amt pos">+30.00</td><td class="mono">40</td><td>Food › Dining out <span class="pos mono">+30.00</span> <span class="null">auto</span></td></tr>
+      <tr><td class="mono">#911</td><td>2026-12-02</td><td>Tikkie · Carla</td><td class="amt pos">+30.00</td><td class="mono">40</td><td>Food › Dining out <span class="pos mono">+30.00</span> <span class="null">auto</span></td></tr>
+    </table></div>
+    <p><code>link_groups #40 {kind: reimbursement, title: "Dinner De Kas"}</code>, linked by hand (on the real data, reimbursements arrive as plain transfers from friends, so there's nothing reliable to match on). When a Tikkie without splits joins the group, the backend fills its splits from the expense's categories (pro rata). You can edit them like any other split.</p>
+    <div class="result">November's Dining out reports <b class="neg">−60.00</b> (−150 + 90). Carla's Tikkie arrived in December but still counts in November, the month of the dinner. Once Daan's Tikkie is linked, November reports <b class="neg">−30.00</b>.</div>
+  </div>
+
+  <div class="scenario">
+    <h3>3 · Splitting: one receipt, and a mixed weekend trip</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>transaction</th><th>counterparty</th><th class="amt">amount</th><th>link_group_id</th><th>splits</th></tr>
+      <tr><td class="mono">#1100</td><td>Albert Heijn</td><td class="amt neg">−80.00</td><td>—</td><td>Groceries <span class="neg mono">−62.50</span> · Household <span class="neg mono">−17.50</span></td></tr>
+      <tr><td class="mono">#1200</td><td>KLM</td><td class="amt neg">−300.00</td><td class="mono">41</td><td>Travel <span class="neg mono">−300.00</span></td></tr>
+      <tr><td class="mono">#1201</td><td>Trattoria Roma</td><td class="amt neg">−200.00</td><td class="mono">41</td><td>Dining out <span class="neg mono">−200.00</span></td></tr>
+      <tr><td class="mono">#1210</td><td>Tikkie · Anna "dinner"</td><td class="amt pos">+50.00</td><td class="mono">41</td><td>Dining out <span class="pos mono">+50.00</span> <span class="null">edited</span></td></tr>
+    </table></div>
+    <div class="result">The default for Anna's Tikkie would be pro rata (Travel +30, Dining +20). She only paid for dinner, so you change her split to Dining +50. Travel reports <b class="neg">−300.00</b> and Dining out <b class="neg">−150.00</b>. This is reviewer finding #5, now solved by splits.</div>
+  </div>
+
+  <div class="scenario">
+    <h3>4 · Overlapping ING exports (idempotency)</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>step</th><th>what happens</th></tr>
+      <tr><td>Import <code>ing_sep_oct.csv</code></td><td>Batch #1: 212 rows inserted.</td></tr>
+      <tr><td>Import <code>ing_oct_nov.csv</code></td><td>Batch #2: October rows hit the unique <code>(account_id, import_key)</code> → counted as duplicates and skipped. November rows → inserted.</td></tr>
+      <tr><td>Import <code>ing_oct_nov.csv</code> again</td><td>Same <code>file_sha256</code> → returns batch #2 and does nothing.</td></tr>
+      <tr><td>Undo batch #2</td><td><code>DELETE FROM import_batches WHERE id = 2</code> cascades to its transactions and their splits. The October rows still belong to batch #1.</td></tr>
+      <tr><td>Parser changes its key recipe</td><td>Bump it to <code>ing_csv:v2</code> and, in the same change, write a migration that re-keys the existing rows from their stored <code>raw</code>. Otherwise the overlap duplicates once; <code>UndoBatch</code> fixes that.</td></tr>
+    </table></div>
+  </div>
+
+  <h2 id="reporting">Reporting rules</h2>
+  <p class="lede">Reports are computed, not stored. With splits, category totals are plain sums. The groups only decide what's excluded and which month an amount lands in.</p>
+  <div class="scenario"><table class="rules">
+    <tr><td>Category total</td><td>Σ <code>transaction_splits.amount_cents</code> per category and month. A positive split (a Tikkie, a refund) reduces the spending in its category. If you get back more than you paid, the category can end up positive for that month.</td></tr>
+    <tr><td>Transfer group</td><td>Excluded from all income and expense reports. Members have no splits.</td></tr>
+    <tr><td>Month</td><td>The transaction's <code>booked_on</code>. Exception: members of a reimbursement group count in the month of the group's earliest negative member. A group with only positive members uses each member's own date.</td></tr>
+    <tr><td>Default Tikkie splits</td><td>A positive member without splits gets them filled pro rata over the negative members' splits when it joins a group. Cents are rounded with the largest-remainder method, so the splits always add up exactly.</td></tr>
+    <tr><td>Uncategorized</td><td>Transactions without splits that aren't in a transfer group. Shown as two buckets, "Uncategorized in" and "Uncategorized out", so incoming and outgoing money don't cancel out.</td></tr>
+    <tr><td>Balance</td><td>Not in v1. The balance-after column is kept in <code>raw</code>, so it can be added later.</td></tr>
+  </table></div>
+
+  <h2 id="deferred">Deferred until needed</h2>
+  <p class="lede">Removed from v1. Each one is a standalone migration.</p>
+  <div class="scenario"><table class="deferred">
+    <tr><th>addition</th><th>what it gives</th><th>add when</th></tr>
+    <tr><td>rules</td><td>Auto-categorization on import (conditions → split), plus a manual flag so rules never overwrite your choices</td><td>When manual categorizing gets tedious</td></tr>
+    <tr><td>accounts.identifier</td><td>IBAN or card suffix, so a file covering several accounts can be routed automatically</td><td>When multi-account exports become an actual problem, or with the aggregator API</td></tr>
+    <tr><td>accounts.kind</td><td>checking | savings | credit_card | investment</td><td>Balances or Degiro, the first logic that would read it</td></tr>
+    <tr><td>manual transactions</td><td>Cash payments and other entries that aren't on a statement (<code>manual:{uuid}</code> keys, nullable <code>import_batch_id</code>)</td><td>When you first need one</td></tr>
+    <tr><td>reimbursement suggestions</td><td>Matching incoming payments to recent expenses</td><td>Once manual linking shows what your reimbursements look like</td></tr>
+    <tr><td>paging</td><td><code>page_size</code> / <code>page_token</code> on <code>ListTransactions</code></td><td>When listing gets slow</td></tr>
+    <tr><td>updated_at</td><td>"Last modified" per transaction, via a trigger</td><td>When something needs it</td></tr>
+    <tr><td>accounts.currency</td><td>Accounts in currencies other than EUR</td><td>A non-EUR account (Degiro cash may need it)</td></tr>
+    <tr><td>balances</td><td><code>opening_balance_cents</code> and/or <code>balance_snapshots</code>: account balances, statement checks, investment value over time</td><td>Adding Degiro, or when you want balances</td></tr>
+    <tr><td>source_keys</td><td>Several identities per transaction (CSV key + aggregator ID), so switching sources doesn't duplicate the overlap</td><td>Switching to the aggregator API</td></tr>
+    <tr><td>data_sources</td><td>Configured connections and credentials</td><td>Aggregator API</td></tr>
+    <tr><td>tags</td><td>Labels across categories (#vakantie-2026)</td><td>When categories aren't enough</td></tr>
+    <tr><td>payees</td><td>Normalized merchant names</td><td>When counterparty names get too messy</td></tr>
+    <tr><td>expected amounts</td><td>Outstanding Tikkies: what each person still owes</td><td>When you want to see who still owes you</td></tr>
+    <tr><td>raw_records</td><td>Per-row audit of every import, including duplicates</td><td>If import debugging needs more than <code>raw</code> + batch counters</td></tr>
+    <tr><td>stored suggestions</td><td>Remembering dismissed transfer and Tikkie suggestions</td><td>When re-suggested pairs get annoying</td></tr>
+  </table></div>
+
+  <h2 id="backend">Backend structure (implemented)</h2>
+  <p class="lede">A Cargo workspace with five crates. Dependencies only point down: <code>sources</code> knows nothing about the database, only <code>core</code> queries it, and the gRPC handlers in <code>server</code> stay thin.</p>
+  <div class="diagram"><svg id="deps-svg" role="img" aria-label="Crate dependency diagram"></svg></div>
+  <div class="legend"><span>Solid arrow = depends on / calls. Dashed = generated by a script, not a Cargo dependency.</span></div>
+
+  <h3>Crates</h3>
+  <div class="scenario"><table class="rules">
+    <tr><th>crate</th><th>responsibility</th><th>main dependencies</th></tr>
+    <tr><td>migration</td><td>Tables, enum types, indexes and FKs as <code>sea-orm-migration</code> code. The only place the schema is written by hand.</td><td class="mono">sea-orm-migration</td></tr>
+    <tr><td>entity</td><td>Generated by <code>generate-entities</code>: an ephemeral Postgres, then the migrations, then <code>sea-orm-cli generate entity</code>. Checked in and never edited. Regenerating reproduces the same files.</td><td class="mono">sea-orm</td></tr>
+    <tr><td>sources</td><td>The ING and AMEX parsers. Bytes in, <code>NormalizedMutation</code>s out. No database, so it's tested with plain fixture files (anonymized excerpts of the real exports).</td><td class="mono">csv, sha2, jiff, serde_json</td></tr>
+    <tr><td>core</td><td>All use cases: import, transfer suggestions and group rules, splits (Σ check, default Tikkie splits), the category tree, reports. Each public function owns its DB transaction and returns domain types, not entity models.</td><td class="mono">entity, sources, jiff, thiserror</td></tr>
+    <tr><td>server</td><td>The binary. Reads config from env, connects, runs pending migrations, serves tonic + tonic-web, logs with tracing. Handlers only convert proto ↔ core and errors → <code>Status</code>. Later it also serves the built frontend (same origin, so no CORS), so deploying on NixOS is one binary plus Postgres.</td><td class="mono">core, migration, tonic, tonic-web</td></tr>
+  </table></div>
+
+  <h3>Repository layout</h3>
+  <pre class="code">finance_tracker/
+├── .envrc · devenv.nix · devenv.yaml     # rust (via mbx), buf, protobuf, postgresql_17, sea-orm-cli; services.postgres
+├── Cargo.toml                            # workspace
+├── proto/
+│   ├── buf.yaml                          # buf lint; buf.gen.yaml for TS codegen comes with the frontend
+│   └── finance/                          # package finance; no version suffix (see Conventions)
+│       ├── common.proto                  # Date
+│       ├── accounts.proto  imports.proto  transactions.proto
+│       └── links.proto     categories.proto  reports.proto
+├── crates/
+│   ├── migration/src/m20261122_000001_init.rs
+│   ├── entity/src/                       # generated, do not edit
+│   ├── sources/
+│   │   ├── src/{lib, ing_csv, amex_csv}.rs
+│   │   └── tests/fixtures/{ing,amex}.csv # anonymized excerpts of the real exports
+│   ├── core/src/{imports, links, splits, categories, reports, time, error}.rs   # crate tally-core
+│   └── server/                           # crate tally-server, binary tally
+│       ├── build.rs                      # tonic-build from ../../proto
+│       └── src/{main, config}.rs, src/grpc/*.rs
+├── scripts/
+│   ├── with-ephemeral-postgres.sh        # initdb + pg_ctl in mktemp, trap cleanup, exports DATABASE_URL
+│   └── generate-entities.sh              # uses the script above
+└── web/                                  # frontend, later</pre>
+
+  <h3>gRPC services</h3>
+  <div class="scenario"><table class="rules">
+    <tr><td>AccountService</td><td><code>ListAccounts</code>, <code>CreateAccount</code>, <code>UpdateAccount</code></td></tr>
+    <tr><td>ImportService</td><td><code>ImportFile(account_id, source, file_name, bytes) → {batch, already_imported}</code> with source <code>ing_csv</code> or <code>amex_csv</code>, <code>ListBatches</code>, <code>UndoBatch</code></td></tr>
+    <tr><td>TransactionService</td><td><code>ListTransactions(filter)</code> (all matches, newest first), <code>GetTransaction</code>, <code>SetSplits(transaction_id, splits)</code> (replaces all splits, Σ checked), <code>SetNotes</code></td></tr>
+    <tr><td>LinkService</td><td><code>GetGroup</code>, <code>SuggestTransfers</code> (computed on the fly), <code>CreateGroup(kind, title, transaction_ids)</code>, <code>UpdateGroupMembers</code>, <code>DeleteGroup</code>. Group rules are validated here.</td></tr>
+    <tr><td>CategoryService</td><td><code>ListCategories</code> (tree), <code>CreateCategory</code>, <code>UpdateCategory</code> (rename or move), <code>DeleteCategory</code> (refused while in use)</td></tr>
+    <tr><td>ReportService</td><td><code>CategoryTotals(from, to)</code> → one row per month × category, plus the two Uncategorized buckets</td></tr>
+  </table></div>
+
+  <h3>Conventions</h3>
+  <div class="scenario"><table class="rules">
+    <tr><td>Proto versioning</td><td><code>package finance;</code> without a <code>v1</code> suffix. Frontend and backend ship together, so compatible changes (new fields, never reusing field numbers) are enough.</td></tr>
+    <tr><td>Money</td><td><code>int64 amount_cents</code> in proto, <code>i64</code> in Rust, <code>bigint</code> in Postgres. EUR only in v1.</td></tr>
+    <tr><td>Dates and times</td><td>A <code>Date {year, month, day}</code> message for booking dates, <code>google.protobuf.Timestamp</code> for timestamps. jiff in <code>sources</code>, <code>core</code> and <code>server</code>.</td></tr>
+    <tr><td>Errors</td><td><code>core::Error</code> = <code>NotFound | InvalidArgument | FailedPrecondition | Database</code>, mapped 1:1 to tonic status codes. A group-rule violation is <code>FailedPrecondition</code> with a readable message.</td></tr>
+    <tr><td>Tests</td><td><code>sources</code>: unit tests on the fixture CSVs, including "two overlapping exports give the same keys". <code>core</code>: integration tests on real Postgres via <code>test-all</code>; each test creates and migrates its own database, so tests run in parallel, and all data enters through <code>import_file</code>. Proto: <code>buf lint</code>. Migrations only run forward.</td></tr>
+    <tr><td>Dev loop</td><td><code>direnv allow</code> → <code>devenv up</code> (local Postgres) → <code>cargo run -p tally-server</code> (cargo goes through the mbx build cache). After editing a migration: <code>generate-entities</code>.</td></tr>
+  </table></div>
+
+  <h2 id="open">Open questions</h2>
+  <ul class="open">
+    <li><b>jiff and SeaORM (decided: option 1).</b> SeaORM 2.0.4 only supports chrono and time column types, so the generated entities use chrono and <code>tally-core</code>'s <code>time</code> module converts at the boundary. Everything above <code>entity</code> sees jiff only.</li>
+    <li><b>Pending AMEX charges.</b> The current export shows no pending rows. If a later export includes a pending charge that changes once it posts (amount, date or description), it would be imported twice. Check when you next see one.</li>
+    <li><b>A transaction can be in at most one group.</b> Using an FK enforces this structurally. If one bank transfer from a friend covers two dinners, put both dinners in one group.</li>
+    <li><b>IDs are <code>bigint</code> identity columns</b>, exposed as <code>int64</code> in proto.</li>
+  </ul>
+</div>
+
+<script>
+const DOMAINS = [
+  { id: "ledger", title: "Ledger", color: "var(--d-ledger)" },
+  { id: "import", title: "Import", color: "var(--d-import)" },
+  { id: "group", title: "Grouping", color: "var(--d-group)" },
+  { id: "class", title: "Classification", color: "var(--d-class)" },
+];
+
+// cols: [name, type, key ("pk" | "uq" | "fk:<table>" | ""), nullable, note]
+const TABLES = [
+  { name: "accounts", domain: "ledger", purpose: "A bank account, credit card or (later) investment account.",
+    cols: [
+      ["id", "bigint", "pk", false, "Identity column"],
+      ["name", "text", "uq", false, "\"ING Betaalrekening\", \"Credit card\""],
+      ["created_at", "timestamptz", "", false, "UTC"],
+    ], constraints: ["Can't be deleted while transactions or batches reference it (ON DELETE RESTRICT)."] },
+
+  { name: "transactions", domain: "ledger", purpose: "One line from a statement, on one account.",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["account_id", "bigint", "fk:accounts", false, "ON DELETE RESTRICT"],
+      ["import_batch_id", "bigint", "fk:import_batches", false, "ON DELETE CASCADE, so undoing a batch removes its rows"],
+      ["import_key", "text", "", false, "\"{parser}:v{n}:{key}\", built by the parser"],
+      ["booked_on", "date", "", false, "The bank's booking date"],
+      ["amount_cents", "bigint", "", false, "Signed cents. Negative means money left the account."],
+      ["counterparty_name", "text", "", true, ""],
+      ["counterparty_iban", "text", "", true, ""],
+      ["description", "text", "", false, "Remittance text"],
+      ["link_group_id", "bigint", "fk:link_groups", true, "Transfer or reimbursement group. ON DELETE SET NULL."],
+      ["notes", "text", "", true, ""],
+      ["raw", "jsonb", "", false, "Original source row"],
+      ["created_at", "timestamptz", "", false, "UTC"],
+    ], constraints: ["Unique (account_id, import_key): this makes imports idempotent.", "Index (account_id, booked_on), index (link_group_id).", "The category lives on transaction_splits. No splits = uncategorized."] },
+
+  { name: "transaction_splits", domain: "class", purpose: "The part of a transaction that belongs to one category. Most transactions have exactly one split.",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["transaction_id", "bigint", "fk:transactions", false, "ON DELETE CASCADE"],
+      ["category_id", "bigint", "fk:categories", false, "ON DELETE RESTRICT"],
+      ["amount_cents", "bigint", "", false, "Signed, like the transaction. CHECK (amount_cents <> 0)."],
+      ["rule_id", "bigint", "fk:rules", true, "The rule that set this label; NULL when you set it. ON DELETE SET NULL."],
+    ], constraints: ["Unique (transaction_id, category_id).", "Backend rule: if a transaction has splits, they add up exactly to its amount_cents. SetSplits replaces all of a transaction's splits in one DB transaction.", "Backend rule: members of a transfer group have no splits."] },
+
+  { name: "rules", domain: "class", purpose: "Auto-label rules: counterparty contains pattern → category.",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["pattern", "text", "", false, "Lowercase, trimmed. Matched as a substring of the counterparty name."],
+      ["category_id", "bigint", "fk:categories", true, "Target: label with this category. ON DELETE CASCADE."],
+      ["counter_account_id", "bigint", "fk:accounts", true, "Target: transfer to (or from) this pot. ON DELETE CASCADE."],
+      ["direction", "rule_direction", "", true, "out | in; NULL for both"],
+      ["account_id", "bigint", "fk:accounts", true, "Only on this account; NULL for all. ON DELETE CASCADE."],
+      ["min_amount_cents / max_amount_cents", "bigint", "", true, "Optional range on the amount's size, inclusive"],
+      ["created_at", "timestamptz", "", false, "UTC"],
+    ], constraints: ["Exactly one target: CHECK ((category_id IS NULL) <> (counter_account_id IS NULL)).", "Unique NULLS NOT DISTINCT (pattern, direction, account_id, min_amount_cents, max_amount_cents): one pattern can have several ranges.", "Longest matching pattern wins, then the narrower scope (account, direction, minimum, maximum each count), then the newest rule."] },
+
+  { name: "import_batches", domain: "import", purpose: "One file upload (later: one API sync).",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["account_id", "bigint", "fk:accounts", false, "Chosen at upload. Every row in the file goes to this account."],
+      ["source", "text", "", false, "Parser id: ing_csv | amex_csv. Text, so a new parser needs no migration."],
+      ["file_name", "text", "", true, ""],
+      ["file_sha256", "text", "uq", false, "Same file again → no-op"],
+      ["inserted / duplicates", "int", "", false, "Counters shown after the import"],
+      ["imported_at", "timestamptz", "", false, "UTC"],
+    ], constraints: ["The whole import runs in one DB transaction, so there's no failed or partial state to store."] },
+
+  { name: "link_groups", domain: "group", purpose: "Transactions that belong together: a transfer between your accounts, or an expense and its reimbursements.",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["kind", "link_kind", "", false, "Postgres enum: transfer | reimbursement"],
+      ["title", "text", "", true, "\"Dinner De Kas\""],
+      ["counter_account_id", "bigint", "fk:accounts", true, "One-sided transfer only: the pot on its other side. ON DELETE RESTRICT."],
+      ["rule_id", "bigint", "fk:rules", true, "The rule that made this transfer; cleared when you change the group. ON DELETE SET NULL."],
+      ["created_at", "timestamptz", "", false, "UTC"],
+    ], constraints: ["Members are the transactions with this link_group_id. Role comes from the sign: out/in for a transfer, expense (−) or reimbursement (+) for a reimbursement.", "Backend rules: a transfer has 1 or 2 members, on different accounts, with amounts summing to 0 when there are 2. A reimbursement has at least 1 member.", "Delete the group → members' link_group_id is set to NULL.", "counter_account_id: only on a transfer with one member, never its own account; cleared when the real other side joins (CHECK keeps it to transfers)."] },
+
+  { name: "categories", domain: "class", purpose: "The category tree (Food › Groceries).",
+    cols: [
+      ["id", "bigint", "pk", false, ""],
+      ["parent_id", "bigint", "fk:categories", true, "NULL for top level. ON DELETE RESTRICT."],
+      ["name", "text", "", false, ""],
+      ["kind", "category_kind", "", false, "Postgres enum: expense | income. Decides which side of a report it shows on."],
+    ], constraints: ["Unique NULLS NOT DISTINCT (parent_id, name), so two top-level categories can't share a name either.", "Can't be deleted while splits or child categories use it."] },
+];
+
+const LAYOUT = {
+  accounts:           { x: 370, y: 10,  w: 250, cols: ["id", "name", "created_at"] },
+  import_batches:     { x: 20,  y: 196, w: 250, cols: ["id", "account_id", "source", "file_sha256", "imported_at"] },
+  transactions:       { x: 370, y: 196, w: 250, cols: ["id", "account_id", "import_batch_id", "import_key", "booked_on", "amount_cents", "counterparty_name", "link_group_id"] },
+  link_groups:        { x: 720, y: 196, w: 250, cols: ["id", "kind", "title", "counter_account_id", "created_at"] },
+  transaction_splits: { x: 370, y: 450, w: 250, cols: ["id", "transaction_id", "category_id", "amount_cents", "rule_id"] },
+  rules:              { x: 20,  y: 450, w: 250, cols: ["id", "pattern", "category_id", "direction"] },
+  categories:         { x: 720, y: 450, w: 250, cols: ["id", "parent_id", "name", "kind"] },
+};
+
+// [child.fkColumn, childSide, childAnchor, parentTable, parentSide, parentAnchor]
+const EDGES = [
+  ["transactions.account_id", "top", 0.5, "accounts", "bottom", 0.5],
+  ["transactions.import_batch_id", "left", "import_batch_id", "import_batches", "right", 0.4],
+  ["transactions.link_group_id", "right", "link_group_id", "link_groups", "left", 0.5],
+  ["transaction_splits.transaction_id", "top", 0.5, "transactions", "bottom", 0.5],
+  ["transaction_splits.category_id", "right", "category_id", "categories", "left", "id"],
+  ["transaction_splits.rule_id", "left", "rule_id", "rules", "right", "id"],
+  ["rules.category_id", "bottom", 0.5, "categories", "bottom", 0.5],
+  ["import_batches.account_id", "top", 0.5, "accounts", "left", 0.5],
+  ["link_groups.counter_account_id", "top", 0.5, "accounts", "right", 0.5],
+  ["categories.parent_id", "self"],
+];
+
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "style") e.style.cssText = v; else e.setAttribute(k, v);
+  }
+  for (const c of children) e.append(c);
+  return e;
+}
+
+function renderTables() {
+  const root = document.getElementById("tables");
+  root.append(el("h2", {}, "Tables"));
+  const cards = el("div", { class: "cards" });
+  const colors = Object.fromEntries(DOMAINS.map(d => [d.id, d.color]));
+  for (const t of TABLES) {
+    const card = el("div", { class: "card", id: "t-" + t.name, style: `--dc:${colors[t.domain]}` });
+    card.append(el("h3", {}, t.name), el("div", { class: "purpose" }, t.purpose));
+    const table = el("table");
+    table.append(el("tr", {}, el("th", {}, "column"), el("th", {}, "type"), el("th", {}, "notes")));
+    for (const [name, type, key, nullable, note] of t.cols) {
+      const colTd = el("td", { class: "col" }, name);
+      if (key === "pk") colTd.append(el("span", { class: "badge pk" }, "PK"));
+      if (key === "uq") colTd.append(el("span", { class: "badge uq" }, "UQ"));
+      const noteTd = el("td");
+      if (key.startsWith("fk:")) {
+        const target = key.slice(3);
+        colTd.append(el("span", { class: "badge fk" }, "FK"));
+        noteTd.append(el("a", { class: "fk-link", href: "#t-" + target }, "→ " + target), note ? " · " : "");
+      }
+      noteTd.append(note);
+      const typeTd = el("td", { class: "type" }, type);
+      if (nullable) typeTd.append(el("span", { class: "null" }, "null"));
+      table.append(el("tr", {}, colTd, typeTd, noteTd));
+    }
+    card.append(el("div", { class: "tbl-wrap" }, table));
+    if (t.constraints.length) {
+      const ul = el("ul");
+      t.constraints.forEach(c => ul.append(el("li", {}, c)));
+      card.append(el("div", { class: "constraints" }, ul));
+    }
+    cards.append(card);
+  }
+  root.append(cards);
+}
+
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs = {}, text) => {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+};
+
+function renderER() {
+  const s = svgEl, svg = document.getElementById("er-svg");
+  const tables = Object.fromEntries(TABLES.map(t => [t.name, t]));
+  const colors = Object.fromEntries(DOMAINS.map(d => [d.id, d.color]));
+  const ROW = 20, HEAD = 26, PAD = 6;
+  const boxes = {};
+  for (const [name, L] of Object.entries(LAYOUT)) {
+    const t = tables[name];
+    const byCol = Object.fromEntries(t.cols.map(c => [c[0], c]));
+    const rows = L.cols.map(c => { if (!byCol[c]) throw new Error(`${name}.${c} missing`); return byCol[c]; });
+    boxes[name] = { name, t, x: L.x, y: L.y, w: L.w ?? 200, h: HEAD + rows.length * ROW + PAD, rows };
+  }
+  const rowY = (b, col) => b.y + HEAD + b.rows.findIndex(r => r[0] === col) * ROW + ROW / 2;
+  const anchor = (b, side, spec) => {
+    if (side === "left" || side === "right") {
+      const y = typeof spec === "string" ? rowY(b, spec) : b.y + b.h * spec;
+      return [side === "left" ? b.x : b.x + b.w, y];
+    }
+    return [b.x + b.w * spec, side === "top" ? b.y : b.y + b.h];
+  };
+  const DIR = { left: [-1, 0], right: [1, 0], top: [0, -1], bottom: [0, 1] };
+
+  const defs = s("defs");
+  for (const hl of ["", "-hl"]) {
+    const many = s("marker", { id: "m-many" + hl, viewBox: "0 0 14 14", refX: 14, refY: 7, markerWidth: 14, markerHeight: 14,
+      markerUnits: "userSpaceOnUse", orient: "auto-start-reverse" });
+    many.append(s("path", { class: "er-marker" + (hl ? " hl" : ""), d: "M2 7 L14 1 M2 7 L14 13 M2 7 L14 7" }));
+    const one = s("marker", { id: "m-one" + hl, viewBox: "0 0 14 14", refX: 14, refY: 7, markerWidth: 14, markerHeight: 14,
+      markerUnits: "userSpaceOnUse", orient: "auto" });
+    one.append(s("path", { class: "er-marker" + (hl ? " hl" : ""), d: "M8 1 L8 13" }));
+    defs.append(many, one);
+  }
+  svg.append(defs);
+  const edgeLayer = s("g"), boxLayer = s("g");
+  svg.append(edgeLayer, boxLayer);
+  const edgeEls = [];
+
+  for (const [childRef, cSide, cSpec, parent, pSide, pSpec] of EDGES) {
+    const [child, col] = childRef.split(".");
+    const cb = boxes[child];
+    const nullable = cb.t.cols.find(c => c[0] === col)[3];
+    let d;
+    if (cSide === "self") {
+      const x = cb.x + cb.w, y1 = rowY(cb, col), y2 = cb.y + 13;
+      d = `M${x} ${y1} C${x + 46} ${y1} ${x + 46} ${y2} ${x} ${y2}`;
+    } else {
+      const pb = boxes[parent];
+      const p1 = anchor(cb, cSide, cSpec), p2 = anchor(pb, pSide, pSpec);
+      const ctrl = (p, side, other) => {
+        const [dx, dy] = DIR[side];
+        const dist = Math.max(cSide === pSide ? 56 : 28, (dx ? Math.abs(other[0] - p[0]) : Math.abs(other[1] - p[1])) / 2);
+        return [p[0] + dx * dist, p[1] + dy * dist];
+      };
+      const c1 = ctrl(p1, cSide, p2), c2 = ctrl(p2, pSide, p1);
+      d = `M${p1[0]} ${p1[1]} C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${p2[0]} ${p2[1]}`;
+    }
+    const target = cSide === "self" ? child : parent;
+    const path = s("path", { class: "er-edge" + (nullable ? " opt" : ""), d, "marker-start": "url(#m-many)", "marker-end": "url(#m-one)" });
+    path.dataset.a = child; path.dataset.b = target;
+    path.append(s("title", {}, `${childRef} → ${target}.id${nullable ? " (nullable)" : ""}`));
+    edgeLayer.append(path); edgeEls.push(path);
+  }
+
+  for (const b of Object.values(boxes)) {
+    const color = colors[b.t.domain];
+    const a = s("a", { href: "#t-" + b.name, class: "er-box" });
+    a.dataset.t = b.name;
+    a.append(s("rect", { class: "er-body", x: b.x, y: b.y, width: b.w, height: b.h, rx: 7 }));
+    a.append(s("path", { d: `M${b.x} ${b.y + HEAD} V${b.y + 7} Q${b.x} ${b.y} ${b.x + 7} ${b.y} H${b.x + b.w - 7} Q${b.x + b.w} ${b.y} ${b.x + b.w} ${b.y + 7} V${b.y + HEAD} Z`,
+      style: `fill: color-mix(in srgb, ${color} 22%, var(--surface))` }));
+    a.append(s("rect", { x: b.x, y: b.y, width: 4, height: b.h, rx: 2, style: `fill:${color}` }));
+    a.append(s("text", { class: "er-title", x: b.x + 12, y: b.y + 17 }, b.name));
+    const nameW = Math.max(...b.rows.map(r => r[0].length + (r[3] ? 1 : 0))) * 6.7;
+    const typeX = b.x + 12 + nameW + 14;
+    b.rows.forEach((r, i) => {
+      const [name, type, key, nullable] = r;
+      const y = b.y + HEAD + i * ROW;
+      if (i > 0) a.append(s("line", { class: "er-sep", x1: b.x + 8, x2: b.x + b.w - 6, y1: y, y2: y }));
+      a.append(s("text", { class: "er-col", x: b.x + 12, y: y + 14 }, name + (nullable ? "?" : "")));
+      a.append(s("text", { class: "er-type", x: typeX, y: y + 14 }, type));
+      let badge = null, fill = "";
+      if (key === "pk") { badge = "PK"; fill = "var(--pk)"; }
+      else if (key === "uq") { badge = "UQ"; fill = "var(--uq)"; }
+      else if (key.startsWith("fk:")) { badge = "FK"; fill = "var(--fk)"; }
+      if (badge) a.append(s("text", { class: "er-badge", x: b.x + b.w - 8, y: y + 14, "text-anchor": "end", style: `fill:${fill}` }, badge));
+    });
+    a.addEventListener("mouseenter", () => {
+      svg.classList.add("focus");
+      const related = new Set([b.name]);
+      for (const p of edgeEls) {
+        const on = p.dataset.a === b.name || p.dataset.b === b.name;
+        p.classList.toggle("hl", on);
+        p.setAttribute("marker-start", on ? "url(#m-many-hl)" : "url(#m-many)");
+        p.setAttribute("marker-end", on ? "url(#m-one-hl)" : "url(#m-one)");
+        if (on) { related.add(p.dataset.a); related.add(p.dataset.b); }
+      }
+      boxLayer.querySelectorAll(".er-box").forEach(g => g.classList.toggle("hl", related.has(g.dataset.t)));
+    });
+    a.addEventListener("mouseleave", () => {
+      svg.classList.remove("focus");
+      for (const p of edgeEls) { p.classList.remove("hl"); p.setAttribute("marker-start", "url(#m-many)"); p.setAttribute("marker-end", "url(#m-one)"); }
+      boxLayer.querySelectorAll(".er-box").forEach(g => g.classList.remove("hl"));
+    });
+    boxLayer.append(a);
+  }
+  const maxX = Math.max(...Object.values(boxes).map(b => b.x + b.w)) + 60;
+  const maxY = Math.max(...Object.values(boxes).map(b => b.y + b.h)) + 46; // room for edges routed below the boxes
+  svg.setAttribute("viewBox", `0 0 ${maxX} ${maxY}`);
+}
+
+const PIPE_MAIN = [
+  { t: "Upload file for an account", s: "ING CSV · AMEX CSV" },
+  { t: "File hash seen before?", s: "import_batches.file_sha256", kind: "decision", side: { label: "yes", t: "Return existing batch", s: "no-op", kind: "outcome" }, next: "no" },
+  { t: "ing_csv::parse | amex_csv::parse", s: "→ NormalizedMutation[]" },
+  { t: "Each row carries its import_key", s: "{parser}:v{n}:{key}, built by the parser" },
+  { t: "(account_id, import_key) exists?", s: "unique index", kind: "decision", side: { label: "yes", t: "duplicate", s: "skip, count it", kind: "outcome" }, next: "no" },
+  { t: "Insert transaction", s: "all rows in one DB transaction", kind: "outcome good" },
+  { t: "Transfer suggestions", s: "computed on the fly; Tikkies linked by hand", side: { label: "confirm", t: "link_groups", s: "set link_group_id, fill Tikkie splits", kind: "outcome good" } },
+];
+
+function renderPipeline() {
+  const s = svgEl, svg = document.getElementById("pipe-svg");
+  const W = 300, H = 46, STEP = 72, X = 20, SX = 470, SW = 300;
+  const defs = s("defs");
+  const m = s("marker", { id: "pf-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 8, markerHeight: 8, orient: "auto" });
+  m.append(s("path", { class: "pf-arrow", d: "M0 0 L10 5 L0 10 z" }));
+  defs.append(m); svg.append(defs);
+  const node = (x, y, w, n) => {
+    const g = s("g");
+    g.append(s("rect", { class: "pf-node " + (n.kind || ""), x, y, width: w, height: H, rx: n.kind?.includes("decision") ? 23 : 8 }));
+    g.append(s("text", { class: "pf-title", x: x + w / 2, y: y + 19, "text-anchor": "middle" }, n.t));
+    g.append(s("text", { class: "pf-sub", x: x + w / 2, y: y + 35, "text-anchor": "middle" }, n.s));
+    svg.append(g);
+  };
+  const edge = (d, label, lx, ly, anchor = "start") => {
+    svg.append(s("path", { class: "pf-edge", d, "marker-end": "url(#pf-arrow)" }));
+    if (label) svg.append(s("text", { class: "pf-label", x: lx, y: ly, "text-anchor": anchor }, label));
+  };
+  PIPE_MAIN.forEach((n, i) => {
+    const y = 10 + i * STEP;
+    if (i < PIPE_MAIN.length - 1) {
+      const x = X + W / 2;
+      edge(`M${x} ${y + H} L${x} ${y + STEP - 1}`, n.next, x + 8, y + H + 16);
+    }
+    if (n.side) {
+      edge(`M${X + W} ${y + H / 2} L${SX - 1} ${y + H / 2}`, n.side.label, (X + W + SX) / 2, y + H / 2 - 7, "middle");
+      node(SX, y, SW, n.side);
+    }
+    node(X, y, W, n);
+  });
+  svg.setAttribute("viewBox", `0 0 ${SX + SW + 20} ${10 + (PIPE_MAIN.length - 1) * STEP + H + 10}`);
+}
+
+const DEPS_NODES = [
+  { x: 10,  y: 10,  t: "proto/", s: "finance/*.proto" },
+  { x: 310, y: 10,  t: "server (bin)", s: "tonic + tonic-web handlers" },
+  { x: 610, y: 10,  t: "frontend (later)", s: "connect-web · buf generate", kind: "outcome" },
+  { x: 10,  y: 120, t: "sources", s: "ing_csv · amex_csv parsers" },
+  { x: 310, y: 120, t: "core", s: "use cases · rules · reports", kind: "outcome good" },
+  { x: 610, y: 120, t: "migration", s: "schema source of truth" },
+  { x: 310, y: 230, t: "entity", s: "generated by sea-orm-cli" },
+];
+// [path, label, labelX, labelY, anchor, dashed]
+const DEPS_EDGES = [
+  ["M250 35 L309 35", "codegen", 280, 28, "middle"],
+  ["M610 35 L551 35", "gRPC-web", 580, 28, "middle"],
+  ["M430 60 L430 119", "calls", 438, 95, "start"],
+  ["M310 145 L251 145", "parse", 280, 138, "middle"],
+  ["M430 170 L430 229", "queries", 438, 205, "start"],
+  ["M550 52 L690 119", "migrate on start", 628, 78, "start"],
+  ["M730 170 L730 255 L551 255", "generate-entities", 640, 248, "middle", true],
+];
+function renderDeps() {
+  const s = svgEl, svg = document.getElementById("deps-svg");
+  const W = 240, H = 50;
+  const defs = s("defs");
+  const m = s("marker", { id: "dp-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 8, markerHeight: 8, orient: "auto" });
+  m.append(s("path", { class: "pf-arrow", d: "M0 0 L10 5 L0 10 z" }));
+  defs.append(m); svg.append(defs);
+  for (const [d, label, lx, ly, anchor, dashed] of DEPS_EDGES) {
+    svg.append(s("path", { class: "pf-edge" + (dashed ? " dash" : ""), d, "marker-end": "url(#dp-arrow)" }));
+    svg.append(s("text", { class: "pf-label", x: lx, y: ly, "text-anchor": anchor }, label));
+  }
+  for (const n of DEPS_NODES) {
+    svg.append(s("rect", { class: "pf-node " + (n.kind || ""), x: n.x, y: n.y, width: W, height: H, rx: 8 }));
+    svg.append(s("text", { class: "pf-title", x: n.x + W / 2, y: n.y + 21, "text-anchor": "middle" }, n.t));
+    svg.append(s("text", { class: "pf-sub", x: n.x + W / 2, y: n.y + 38, "text-anchor": "middle" }, n.s));
+  }
+  svg.setAttribute("viewBox", "0 0 860 290");
+}
+
+renderTables();
+renderER();
+renderPipeline();
+renderDeps();
+</script>
+</body>
+</html>

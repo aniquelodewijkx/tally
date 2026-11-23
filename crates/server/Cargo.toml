@@ -1,0 +1,30 @@
+[package]
+name = "tally-server"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "tally"
+path = "src/main.rs"
+
+[dependencies]
+tally-core.workspace = true
+migration.workspace = true
+sea-orm.workspace = true
+tokio.workspace = true
+jiff.workspace = true
+tonic.workspace = true
+axum.workspace = true
+tower-http.workspace = true
+tonic-web.workspace = true
+tonic-prost.workspace = true
+prost.workspace = true
+prost-types.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+
+[build-dependencies]
+tonic-prost-build.workspace = true

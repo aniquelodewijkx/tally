@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package finance;
+
+import "finance/common.proto";
+
+service ReportService {
+  // Sum of splits per month and category. Transfers are excluded. Members of a reimbursement
+  // group count in the month of the group's earliest expense. Transactions without splits
+  // are reported in two buckets: uncategorized in and uncategorized out.
+  rpc CategoryTotals(CategoryTotalsRequest) returns (CategoryTotalsResponse);
+}
+
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_IN = 1;
+  DIRECTION_OUT = 2;
+}
+
+message CategoryTotal {
+  int32 year = 1;
+  int32 month = 2;
+  oneof target {
+    int64 category_id = 3;
+    // Transactions without splits, by the sign of their amount.
+    Direction uncategorized = 4;
+  }
+  // Net: spent_cents + received_cents.
+  int64 amount_cents = 5;
+  // Sum of the negative amounts (zero or less), e.g. what a dinner cost.
+  int64 spent_cents = 6;
+  // Sum of the positive amounts (zero or more), e.g. the Tikkies paid back for it.
+  int64 received_cents = 7;
+}
+
+message CategoryTotalsRequest {
+  // Inclusive.
+  Date from = 1;
+  // Inclusive.
+  Date to = 2;
+}
+
+message CategoryTotalsResponse {
+  repeated CategoryTotal totals = 1;
+}

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package finance;
+
+import "google/protobuf/timestamp.proto";
+
+service ImportService {
+  // Imports one statement file into one account. Idempotent: importing the same file again,
+  // or a file that overlaps an earlier one, never creates duplicate transactions.
+  rpc ImportFile(ImportFileRequest) returns (ImportFileResponse);
+  rpc ListBatches(ListBatchesRequest) returns (ListBatchesResponse);
+  // Deletes a batch with its transactions and their splits.
+  rpc UndoBatch(UndoBatchRequest) returns (UndoBatchResponse);
+}
+
+message ImportBatch {
+  int64 id = 1;
+  int64 account_id = 2;
+  string source = 3;
+  optional string file_name = 4;
+  int32 inserted = 5;
+  int32 duplicates = 6;
+  google.protobuf.Timestamp imported_at = 7;
+}
+
+message ImportFileRequest {
+  int64 account_id = 1;
+  // "ing_csv" or "amex_csv".
+  string source = 2;
+  optional string file_name = 3;
+  bytes content = 4;
+}
+
+message ImportFileResponse {
+  ImportBatch batch = 1;
+  // True when this exact file was imported before; nothing changed.
+  bool already_imported = 2;
+  // New transactions that rules labelled during this import.
+  int64 auto_labelled = 3;
+}
+
+message ListBatchesRequest {
+  optional int64 account_id = 1;
+}
+
+message ListBatchesResponse {
+  repeated ImportBatch batches = 1;
+}
+
+message UndoBatchRequest {
+  int64 batch_id = 1;
+}
+
+message UndoBatchResponse {}
