@@ -52,6 +52,8 @@ cd web && npm run typecheck && npm test && npm run build
 - The proto package is `finance`, with no version suffix. Evolve it compatibly: add fields, never
   renumber or reuse them. After a change, run `npm run generate` in `web/` and commit the output.
 - Parsers accept exactly the real export format: no guessing at delimiters, headers or encodings.
+- `nix/package.nix` pins a hash of the npm dependencies. When `web/package-lock.json` changes,
+  update `npmDepsHash` (`prefetch-npm-deps web/package-lock.json`) in the same PR.
 
 **Frontend**
 - State worth keeping lives in the URL (TanStack Router search params), so a view survives a reload

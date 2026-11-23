@@ -116,6 +116,30 @@ environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`)
 (default `web/dist`). There is no login yet, so anyone who can reach the port sees everything: keep
 it on localhost, or on a network only you can reach.
 
+### On NixOS
+
+[`nix/module.nix`](nix/module.nix) runs Tally as a service with its own local Postgres database,
+on `127.0.0.1:8080` by default. Import it from a pinned copy of this repo:
+
+```nix
+# configuration.nix
+let
+  tally = builtins.fetchTarball {
+    url = "https://github.com/kalmjasper/tally/archive/<commit>.tar.gz";
+    sha256 = "<hash>"; # nix-prefetch-url --unpack <url>
+  };
+in
+{
+  imports = [ "${tally}/nix/module.nix" ];
+  services.tally.enable = true;
+}
+```
+
+On a flake-based system, add `inputs.tally = { url = "github:kalmjasper/tally"; flake = false; };`
+and import `"${inputs.tally}/nix/module.nix"`. `nix flake update tally` then pulls in new versions.
+The package on its own is `pkgs.callPackage "${tally}/nix/package.nix" { }`, and
+`nix-build nix/test.nix` boots a VM that checks the module works.
+
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).
