@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from
 
 import { isUncategorized, type CatIndex } from "../lib/categories";
 import { addMonths, currentMonth, euros, money, monthLabel, monthRange, MONTHS_SHORT } from "../lib/format";
-import { monthModel, spendDelta, subcategorySeries, transferBreakdown, yearModel, type CategoryRow, type Series } from "../lib/overview";
+import { monthModel, monthsCovered, spendDelta, subcategorySeries, transferBreakdown, yearModel, type CategoryRow, type Series } from "../lib/overview";
 import { useSheets } from "../sheets/context";
 import { useAccountRoles, useCats, useTotals, useTransactions } from "../queries";
 import { CategoryIcon, Empty, Segmented, Stepper } from "../ui/controls";
@@ -210,7 +210,7 @@ function YearView({ year, cats }: { year: number; cats: CatIndex }) {
   const now = currentMonth();
   const nowYear = Number(now.slice(0, 4));
   const lastMonth = year < nowYear ? 11 : year === nowYear ? Number(now.slice(5)) - 1 : -1;
-  const months = lastMonth + 1;
+  const months = monthsCovered(totals!, year, lastMonth);
   const drilled = drillId != null && subs != null ? cats.byId.get(drillId) : undefined;
   const series = drilled ? subs! : model.series;
   const shownHidden = drilled ? hiddenSub : hidden;

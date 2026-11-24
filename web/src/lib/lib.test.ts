@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { Category, Total, Tx } from "../api";
 import { indexCategories, OTHER_COLOR } from "./categories";
 import { addMonths, money, monthRange, parseMoney } from "./format";
-import { monthModel, spendDelta, subcategorySeries, transferBreakdown, yearModel } from "./overview";
+import { monthModel, monthsCovered, spendDelta, subcategorySeries, transferBreakdown, yearModel } from "./overview";
 import { quickPicks } from "./picks";
 import { groupRules, subcategoryLabel } from "./rules";
 import { counterpartyKey, detectExport, suggestPattern, txSubtitle } from "./text";
@@ -82,6 +82,15 @@ describe("overview", () => {
     expect(m.expenses.map((r) => r.cat.name)).toEqual(["Housing", "Food"]);
     expect(m.expenses[1].children[0]).toMatchObject({ amount: -2900, spent: -11600, received: 8700, prev: -5000 });
     expect(m.bar.map((b) => b.label)).toEqual(["Housing", "Food", "Uncategorized"]);
+  });
+
+  it("averages over the months since the first import, not since January", () => {
+    const fromJune = [total(6, 2, -100000), total(9, 6, 300000), total(11, 3, -500)];
+    expect(monthsCovered(fromJune, 2026, 10)).toBe(6); // June to November
+    expect(monthsCovered(fromJune, 2026, 11)).toBe(7); // a past year counts up to December
+    expect(monthsCovered([...fromJune, total(3, null, 200, { bucket: "in" })], 2026, 10)).toBe(9); // money in counts too
+    expect(monthsCovered(fromJune, 2025, 11)).toBe(0); // nothing that year
+    expect(monthsCovered(fromJune, 2026, -1)).toBe(0); // a year that hasn't started
   });
 
   it("describes spending changes", () => {
