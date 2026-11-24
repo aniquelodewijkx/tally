@@ -114,8 +114,23 @@ cargo run --release -p tally-server
 
 The `tally` binary serves the API and the built frontend on one port. Configuration comes from the
 environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`), `WEB_DIR`
-(default `web/dist`) and `PASSKEY_FILE` (see below). Without a passkey, anyone who can reach the
-port sees everything: keep it on localhost, or on a network only you can reach.
+(default `web/dist`) and `PASSKEY_FILE` (see below).
+
+### Who can open it
+
+Passkey sign-in is **off by default**. Tally then has no sign-in at all. The app opens straight
+away, and every API call is answered, so whoever can reach the address can see and change
+everything. That's fine while Tally listens only on `127.0.0.1`, which is the default. It's also
+fine behind `tailscale serve` on a tailnet that has only your own devices. Turn the passkey on
+before Tally is reachable by anyone else, for example on a tailnet you share.
+
+| Tally is reachable | Passkey off (default) | Passkey on |
+|---|---|---|
+| Only on `127.0.0.1` (default) | Programs on that machine, no sign-in | Programs on that machine, after signing in |
+| On a tailnet through `tailscale serve` | Every device on the tailnet, no sign-in | Every device can load the page; only your passkey signs in |
+
+You can turn it on or off at any time; nothing in the database changes. Turning it off leaves the
+passkey file unused, so turning it back on later brings back the same passkey.
 
 ### Passkey sign-in
 
@@ -135,10 +150,7 @@ on: open Tally at its final https address when you set it up.
 ### On NixOS
 
 [`nix/module.nix`](nix/module.nix) runs Tally as a service with its own local Postgres database,
-on `127.0.0.1:8080` by default. With `tailscaleServe`, `tailscale serve` makes it reachable on
-your tailnet at `https://<machine>.<tailnet>.ts.net`, with a certificate it gets and renews itself
-(turn on HTTPS certificates in the tailnet's DNS settings first). Import it from a pinned copy of
-this repo:
+on `127.0.0.1:8080` by default. Import it from a pinned copy of this repo:
 
 ```nix
 # configuration.nix
@@ -158,6 +170,18 @@ in
   };
 }
 ```
+
+With `tailscaleServe.enable`, the module sets up `tailscale serve` itself. It adds a
+`tally-tailscale-serve` service that points the tailnet's `https://<machine>.<tailnet>.ts.net` at
+Tally on every boot, and removes that setting when you turn the option off. tailscaled gets the
+certificate and renews it. You still do three things:
+
+1. Set `services.tailscale.enable = true`. The module refuses to build without it.
+2. Sign the machine in to your tailnet once (`sudo tailscale up`, or `services.tailscale.authKeyFile`).
+3. In the Tailscale admin console under **DNS**, turn on MagicDNS and **HTTPS Certificates**.
+
+To run `tailscale serve` yourself instead, leave `tailscaleServe` off and point it at
+`http://127.0.0.1:8080`.
 
 On a flake-based system, add `inputs.tally = { url = "github:kalmjasper/tally"; flake = false; };`
 and import `"${inputs.tally}/nix/module.nix"`. `nix flake update tally` then pulls in new versions.
