@@ -1,10 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 
-import { errorMessage } from "../api";
+import { auth, errorMessage } from "../api";
 import { SheetHost, useSheets } from "../sheets/context";
 import { useAccountRoles, useAccounts, useUncategorized } from "../queries";
 import { potIcon } from "../ui/TransferMenu";
 import { Icon, IconSprite } from "../ui/Icon";
+import { useAuthState } from "./SignIn";
 
 export function Layout() {
   return (
@@ -22,6 +24,13 @@ function Shell() {
   const roles = useAccountRoles();
   const activeAccount = location.pathname === "/transactions" ? (location.search as { account?: number }).account : undefined;
   const activePot = location.pathname === "/pots" ? (location.search as { id?: number }).id : undefined;
+  const signedIn = useAuthState().data === "signed-in";
+  const qc = useQueryClient();
+  const signOut = async () => {
+    await auth.signOut();
+    qc.setQueryData(["auth"], "signed-out"); // brings up the sign-in screen
+    qc.removeQueries({ predicate: (q) => q.queryKey[0] !== "auth" }); // and forgets the data
+  };
 
   return (
     <div className="app">
@@ -49,6 +58,11 @@ function Shell() {
           <button type="button" className="rules-link" onClick={() => open({ kind: "rules" })}>
             <Icon name="sparkle" /><span>Rules</span>
           </button>
+          {signedIn && (
+            <button type="button" className="signout-link" onClick={signOut}>
+              <Icon name="signout" /><span>Sign Out</span>
+            </button>
+          )}
           {(roles?.banks.length ?? 0) > 0 && <div className="h accounts-h">Accounts</div>}
           {roles?.banks.map((a) => (
             <Link key={a.id} to="/transactions" search={{ account: a.id }} className={`account ${activeAccount === a.id ? "on" : ""}`}>

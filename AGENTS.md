@@ -9,7 +9,7 @@ app does.
 |---|---|
 | `crates/sources` | The CSV parsers: bytes in, normalized transactions out. No database. |
 | `crates/core` (`tally-core`) | Every use case. The only crate that queries the database. |
-| `crates/server` (`tally-server`, binary `tally`) | A thin gRPC / gRPC-web layer over `tally-core`; also serves `web/dist`. |
+| `crates/server` (`tally-server`, binary `tally`) | A thin gRPC / gRPC-web layer over `tally-core`; also serves `web/dist`. `src/auth` is passkey sign-in. |
 | `crates/migration` | The schema, as SeaORM migrations. The source of truth for the database. |
 | `crates/entity` | Generated from the migrations by `generate-entities`. Never edit by hand. |
 | `proto/finance` | The API contract. `web/src/gen` is generated from it by `npm run generate`. |
@@ -27,6 +27,7 @@ devenv up                    # local Postgres with the real database
 cargo run -p tally-server    # API on 127.0.0.1:8080
 cd web && npm run dev        # frontend on :5173, proxies the API
 demo                         # made-up data on a throwaway database at 127.0.0.1:18080
+DEMO_PASSKEY=1 demo          # the same with passkey sign-in on, at localhost:18080
 ```
 
 ## Checks
@@ -52,6 +53,10 @@ cd web && npm run typecheck && npm test && npm run build
 - The proto package is `finance`, with no version suffix. Evolve it compatibly: add fields, never
   renumber or reuse them. After a change, run `npm run generate` in `web/` and commit the output.
 - Parsers accept exactly the real export format: no guessing at delimiters, headers or encodings.
+- Passkey sign-in (`crates/server/src/auth`) checks signatures itself, ES256 only. Every check it
+  makes has a test in `webauthn.rs` or `auth/tests.rs`; keep it that way. If you change sign-in,
+  also run the browser check against `DEMO_PASSKEY=1 demo`:
+  `cd web && CHROME=… node demo/passkey-check.mjs`. It uses a virtual passkey in Chromium.
 - `nix/package.nix` pins a hash of the npm dependencies. When `web/package-lock.json` changes,
   update `npmDepsHash` (`prefetch-npm-deps web/package-lock.json`) in the same PR.
 

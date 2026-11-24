@@ -1,5 +1,6 @@
 //! The Tally server: gRPC (and gRPC-web for browsers) on one port.
 
+mod auth;
 mod config;
 mod grpc;
 
@@ -19,8 +20,13 @@ async fn main() -> Result<()> {
     let db = Database::connect(&config.database_url).await.context("connecting to the database")?;
     Migrator::up(&db, None).await.context("running migrations")?;
 
+    let auth = config.passkey_file.map(auth::Auth::new);
+    if let Some(auth) = &auth {
+        tracing::info!(file = %auth.path().display(), "passkey sign-in is on");
+    }
+
     tracing::info!(addr = %config.listen_addr, web_dir = ?config.web_dir, "listening");
-    grpc::serve(Ledger::new(db), config.listen_addr, config.web_dir, async {
+    grpc::serve(Ledger::new(db), auth, config.listen_addr, config.web_dir, async {
         tokio::signal::ctrl_c().await.ok();
         tracing::info!("shutting down");
     })

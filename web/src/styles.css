@@ -74,6 +74,17 @@ h1 { margin: 0; }
 .main { min-width: 0; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
 .page { flex: 1; overflow-y: auto; }
 .grouped { background: var(--grouped); }
+/* ---------- sign-in ---------- */
+.signin { height: 100%; display: grid; place-items: center; background: var(--bg); overflow-y: auto;
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.signin-card { width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  background: var(--surface); border-radius: 16px; padding: 32px 28px 26px; box-shadow: 0 0 0 .5px var(--sep), 0 8px 30px rgba(0,0,0,.06); }
+.signin-card h1 { font: 700 20px var(--font-display); text-wrap: balance; }
+.signin-card p { margin: 0; color: var(--label-2); text-wrap: pretty; }
+.signin-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 4px; border-radius: 14px;
+  background: linear-gradient(160deg, var(--blue), var(--indigo)); color: #fff; font-size: 26px; }
+.signin-btn { margin-top: 10px; width: 100%; padding-block: 8px; font-size: 14px; }
+.signin-note { font-size: 12px; color: var(--label-3) !important; margin-top: 4px !important; }
 .fatal { margin: auto; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--label-2); padding: 24px; }
 .fatal b { color: var(--label); font-size: 15px; }
 
@@ -498,7 +509,7 @@ table.ytable { border-collapse: collapse; width: 100%; font-size: 12px; font-var
 @media (max-width: 860px) {
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .sb { order: 2; border-right: 0; border-top: .5px solid var(--sep); padding: 6px max(8px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); overflow: visible; }
-  .brand, .sb .h, .sb .h.with-action, .sb .account, .sb .rules-link { display: none; }
+  .brand, .sb .h, .sb .h.with-action, .sb .account, .sb .rules-link, .sb .signout-link { display: none; }
   .sb nav { flex-direction: row; justify-content: space-around; }
   .sb nav a, .sb nav button { flex-direction: column; gap: 2px; font-size: 10.5px; padding: 4px 6px; width: auto; position: relative; }
   .sb nav a svg, .sb nav button svg { font-size: 20px; }

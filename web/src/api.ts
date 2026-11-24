@@ -258,6 +258,8 @@ export function errorMessage(e: unknown): string {
   if (e instanceof ConnectError) {
     return e.code === 14 /* unavailable */ ? "Can't reach the server. Is the Tally server running?" : e.rawMessage;
   }
+  if (e instanceof DOMException && e.name === "NotAllowedError") return "The passkey wasn't used. Try again.";
+  if (e instanceof DOMException && e.name === "SecurityError") return "Passkeys don't work at this address. Open Tally at its https address.";
   return e instanceof Error ? e.message : String(e);
 }
 
@@ -422,4 +424,92 @@ export const api = {
       spent: num(t.spentCents),
       received: num(t.receivedCents),
     })),
+};
+
+// ---------- passkey sign-in ----------
+
+/** "off" when the server has no passkey sign-in; "setup" when it has no passkey yet. */
+export type AuthState = "off" | "setup" | "signed-out" | "signed-in";
+
+/** True when an API call failed because there's no valid session. */
+export const needsSignIn = (e: unknown) => e instanceof ConnectError && e.code === 16; /* unauthenticated */
+
+/** Passkeys need https or localhost, and a browser that has them. */
+export const passkeysAvailable = () => window.isSecureContext && typeof window.PublicKeyCredential === "function";
+
+async function authCall(path: string, body?: object): Promise<{ state: AuthState } & Record<string, unknown>> {
+  const res = await fetch(path, {
+    method: path === "/auth/status" ? "GET" : "POST",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(json?.error ?? `The server answered ${res.status}.`);
+  return json;
+}
+
+const b64url = (b: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const fromB64url = (s: string): Uint8Array<ArrayBuffer> => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+
+async function challenge(): Promise<{ challenge: Uint8Array<ArrayBuffer>; credentials: string[] }> {
+  const r = await authCall("/auth/challenge");
+  return { challenge: fromB64url(r.challenge as string), credentials: r.credentials as string[] };
+}
+
+export const auth = {
+  /** An old server, or the Vite dev server without a backend, answers with index.html: no sign-in. */
+  status: async (): Promise<AuthState> => {
+    const res = await fetch("/auth/status");
+    const json = res.ok ? await res.json().catch(() => null) : null;
+    return json?.state ?? "off";
+  },
+
+  /** Makes the passkey Tally will only open for, for this site, and signs in with it. */
+  setUp: async () => {
+    const { challenge: c } = await challenge();
+    const cred = (await navigator.credentials.create({
+      publicKey: {
+        challenge: c,
+        rp: { name: "Tally", id: window.location.hostname },
+        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "Tally", displayName: "Tally" },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 /* ES256 */ }],
+        authenticatorSelection: { residentKey: "required", userVerification: "required" },
+        attestation: "none",
+        timeout: 120_000,
+      },
+    })) as PublicKeyCredential;
+    const r = cred.response as AuthenticatorAttestationResponse;
+    const publicKey = r.getPublicKey();
+    if (!publicKey) throw new Error("This passkey type isn't supported. Try another password manager.");
+    await authCall("/auth/register", {
+      id: b64url(cred.rawId),
+      publicKey: b64url(publicKey),
+      clientDataJson: b64url(r.clientDataJSON),
+      authenticatorData: b64url(r.getAuthenticatorData()),
+    });
+  },
+
+  signIn: async () => {
+    const { challenge: c, credentials } = await challenge();
+    const cred = (await navigator.credentials.get({
+      publicKey: {
+        challenge: c,
+        rpId: window.location.hostname,
+        allowCredentials: credentials.map((id) => ({ type: "public-key", id: fromB64url(id) })),
+        userVerification: "required",
+        timeout: 120_000,
+      },
+    })) as PublicKeyCredential;
+    const r = cred.response as AuthenticatorAssertionResponse;
+    await authCall("/auth/login", {
+      id: b64url(cred.rawId),
+      clientDataJson: b64url(r.clientDataJSON),
+      authenticatorData: b64url(r.authenticatorData),
+      signature: b64url(r.signature),
+    });
+  },
+
+  signOut: async () => {
+    await authCall("/auth/logout");
+  },
 };

@@ -90,6 +90,7 @@ devenv up                       # local Postgres on 127.0.0.1:5432, database "fi
 cargo run -p tally-server       # API on 127.0.0.1:8080, runs migrations on start
 cd web && npm install && npm run dev   # frontend on :5173, proxies the API
 demo                            # made-up data on a throwaway database at 127.0.0.1:18080
+DEMO_PASSKEY=1 demo             # the same with passkey sign-in, at localhost:18080
 ```
 
 After changing the schema in `crates/migration`, run `generate-entities`. After changing a
@@ -112,14 +113,32 @@ cargo run --release -p tally-server
 ```
 
 The `tally` binary serves the API and the built frontend on one port. Configuration comes from the
-environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`) and `WEB_DIR`
-(default `web/dist`). There is no login yet, so anyone who can reach the port sees everything: keep
-it on localhost, or on a network only you can reach.
+environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`), `WEB_DIR`
+(default `web/dist`) and `PASSKEY_FILE` (see below). Without a passkey, anyone who can reach the
+port sees everything: keep it on localhost, or on a network only you can reach.
+
+### Passkey sign-in
+
+Set `PASSKEY_FILE` to a path Tally can write, and every API call needs a session:
+
+1. The first time you open Tally, it asks you to **create a passkey**. It's saved in your password
+   manager (such as iCloud Keychain, which syncs it to your other devices), and its public key goes
+   into `PASSKEY_FILE`. Only that passkey can sign in from then on.
+2. Each device signs in with Face ID, Touch ID or a PIN and stays signed in for 30 days.
+3. To start over (a lost passkey, or to sign every device out), delete the file. The next visit
+   shows the setup screen again.
+
+Whoever opens Tally first after deploying can claim it, so set it up straight away, on a network
+only you are on. Passkeys need https (or `localhost`) and only work at the address they were made
+on: open Tally at its final https address when you set it up.
 
 ### On NixOS
 
 [`nix/module.nix`](nix/module.nix) runs Tally as a service with its own local Postgres database,
-on `127.0.0.1:8080` by default. Import it from a pinned copy of this repo:
+on `127.0.0.1:8080` by default. With `tailscaleServe`, `tailscale serve` makes it reachable on
+your tailnet at `https://<machine>.<tailnet>.ts.net`, with a certificate it gets and renews itself
+(turn on HTTPS certificates in the tailnet's DNS settings first). Import it from a pinned copy of
+this repo:
 
 ```nix
 # configuration.nix
@@ -131,7 +150,12 @@ let
 in
 {
   imports = [ "${tally}/nix/module.nix" ];
-  services.tally.enable = true;
+  services.tailscale.enable = true;
+  services.tally = {
+    enable = true;
+    passkey.enable = true;         # passkey saved in /var/lib/tally/passkey.json
+    tailscaleServe.enable = true;
+  };
 }
 ```
 
