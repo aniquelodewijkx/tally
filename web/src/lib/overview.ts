@@ -141,6 +141,20 @@ export function yearModel(totals: Total[], cats: CatIndex, year: number): YearMo
 }
 
 /**
+ * Count from the first month with activity in the report through `lastMonth` (zero-based).
+ * Months without activity within that span still count.
+ */
+export function monthsCovered(totals: Total[], year: number, lastMonth: number): number {
+  let firstMonth = lastMonth + 1;
+  for (const t of totals) {
+    if (t.year === year && (t.spent !== 0 || t.received !== 0)) {
+      firstMonth = Math.min(firstMonth, t.month - 1);
+    }
+  }
+  return lastMonth + 1 - firstMonth;
+}
+
+/**
  * One top-level expense category's spending per month, split over its direct subcategories
  * (deeper ones count toward theirs), each its own series colored in tree order (gray past the
  * palette, never merged). Money booked on the category itself is "No subcategory".
