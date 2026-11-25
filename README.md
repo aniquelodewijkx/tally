@@ -95,6 +95,7 @@ devenv up                       # local Postgres on 127.0.0.1:5432, database "fi
 cargo run -p tally-server       # API on 127.0.0.1:8080, runs migrations on start
 cd web && npm install && npm run dev   # frontend on :5173, proxies the API
 demo                            # made-up data on a throwaway database at 127.0.0.1:18080
+DEMO_PASSKEY=1 demo             # the same with passkey sign-in, at localhost:18080
 ```
 
 After changing the schema in `crates/migration`, run `generate-entities`. After changing a
@@ -117,9 +118,39 @@ cargo run --release -p tally-server
 ```
 
 The `tally` binary serves the API and the built frontend on one port. Configuration comes from the
-environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`) and `WEB_DIR`
-(default `web/dist`). There is no login yet, so anyone who can reach the port sees everything: keep
-it on localhost, or on a network only you can reach.
+environment: `DATABASE_URL` (required), `LISTEN_ADDR` (default `127.0.0.1:8080`), `WEB_DIR`
+(default `web/dist`) and `PASSKEY_FILE` (see below).
+
+### Who can open it
+
+Passkey sign-in is **off by default**. Tally then has no sign-in at all. The app opens straight
+away, and every API call is answered, so whoever can reach the address can see and change
+everything. That's fine while Tally listens only on `127.0.0.1`, which is the default. It's also
+fine behind `tailscale serve` on a tailnet that has only your own devices. Turn the passkey on
+before Tally is reachable by anyone else, for example on a tailnet you share.
+
+| Tally is reachable | Passkey off (default) | Passkey on |
+|---|---|---|
+| Only on `127.0.0.1` (default) | Programs on that machine, no sign-in | Programs on that machine, after signing in |
+| On a tailnet through `tailscale serve` | Every device on the tailnet, no sign-in | Every device can load the page; only your passkey signs in |
+
+You can turn it on or off at any time; nothing in the database changes. Turning it off leaves the
+passkey file unused, so turning it back on later brings back the same passkey.
+
+### Passkey sign-in
+
+Set `PASSKEY_FILE` to a path Tally can write, and every API call needs a session:
+
+1. The first time you open Tally, it asks you to **create a passkey**. It's saved in your password
+   manager (such as iCloud Keychain, which syncs it to your other devices), and its public key goes
+   into `PASSKEY_FILE`. Only that passkey can sign in from then on.
+2. Each device signs in with Face ID, Touch ID or a PIN and stays signed in for 30 days.
+3. To start over (a lost passkey, or to sign every device out), delete the file. The next visit
+   shows the setup screen again.
+
+Whoever opens Tally first after deploying can claim it, so set it up straight away, on a network
+only you are on. Passkeys need https (or `localhost`) and only work at the address they were made
+on: open Tally at its final https address when you set it up.
 
 ### On NixOS
 
@@ -136,9 +167,26 @@ let
 in
 {
   imports = [ "${tally}/nix/module.nix" ];
-  services.tally.enable = true;
+  services.tailscale.enable = true;
+  services.tally = {
+    enable = true;
+    passkey.enable = true;         # passkey saved in /var/lib/tally/passkey.json
+    tailscaleServe.enable = true;
+  };
 }
 ```
+
+With `tailscaleServe.enable`, the module sets up `tailscale serve` itself. It adds a
+`tally-tailscale-serve` service that points the tailnet's `https://<machine>.<tailnet>.ts.net` at
+Tally on every boot, and removes that setting when you turn the option off. tailscaled gets the
+certificate and renews it. You still do three things:
+
+1. Set `services.tailscale.enable = true`. The module refuses to build without it.
+2. Sign the machine in to your tailnet once (`sudo tailscale up`, or `services.tailscale.authKeyFile`).
+3. In the Tailscale admin console under **DNS**, turn on MagicDNS and **HTTPS Certificates**.
+
+To run `tailscale serve` yourself instead, leave `tailscaleServe` off and point it at
+`http://127.0.0.1:8080`.
 
 On a flake-based system, add `inputs.tally = { url = "github:kalmjasper/tally"; flake = false; };`
 and import `"${inputs.tally}/nix/module.nix"`. `nix flake update tally` then pulls in new versions.

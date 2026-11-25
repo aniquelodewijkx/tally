@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { Category, Total, Tx } from "../api";
 import { indexCategories, OTHER_COLOR } from "./categories";
 import { addMonths, money, monthRange, parseMoney } from "./format";
-import { costFilterTotals, monthModel, monthlyAverage, spendDelta, spendingShares, subcategorySeries, transferBreakdown, withoutFixed, yearChartCosts, yearModel } from "./overview";
+import { costFilterTotals, monthModel, monthlyAverage, monthsCovered, spendDelta, spendingShares, subcategorySeries, transferBreakdown, withoutFixed, yearChartCosts, yearModel } from "./overview";
 import { quickPicks } from "./picks";
 import { groupRules, subcategoryLabel } from "./rules";
 import { counterpartyKey, detectExport, suggestPattern, txSubtitle } from "./text";
@@ -145,6 +145,17 @@ describe("overview", () => {
     expect(m.bar.map((b) => b.label)).toEqual(["Housing", "Food", "Uncategorized"]);
   });
 
+  it("counts months from the first activity in the report, including gaps", () => {
+    const fromJune = [total(6, 2, -100000), total(9, 6, 300000), total(11, 3, -500)];
+    expect(monthsCovered(fromJune, 2026, 10)).toBe(6); // June to November
+    expect(monthsCovered(fromJune, 2026, 11)).toBe(7); // a past year counts up to December
+    expect(monthsCovered([...fromJune, total(3, null, 200, { bucket: "in" })], 2026, 10)).toBe(9); // money in counts too
+    expect(monthsCovered([...fromJune, total(4, 2, 0, { spent: -1000, received: 1000 })], 2026, 10)).toBe(8);
+    expect(monthsCovered(fromJune, 2025, 11)).toBe(0); // nothing that year
+    expect(monthsCovered(fromJune, 2026, 4)).toBe(0); // activity starts after May
+    expect(monthsCovered(fromJune, 2026, -1)).toBe(0); // a year that hasn't started
+  });
+
   it("describes spending changes", () => {
     expect(spendDelta(-39885, -35610)).toEqual({ label: "+12%", tone: "up" });
     expect(spendDelta(-13499, -16874)).toEqual({ label: "−20%", tone: "down" });
@@ -159,9 +170,11 @@ describe("overview", () => {
     expect(y.series.map((s) => s.name)).toEqual(["Housing", "Cat 11", "Uncategorized"]);
     expect(y.series[0].data[0]).toBe(100000);
     expect(y.series[1].color).toBe("var(--s8)"); // the seventh expense category gets the seventh hue
-    const crowded = indexCategories([...many, ...[12, 13, 14, 15].map((id) => category({ id, parentId: null, name: `Cat ${id}`, kind: "expense" }))]);
-    const far = yearModel([total(1, 15, -100)], crowded, 2026).series[0];
-    expect([far.name, far.color]).toEqual(["Cat 15", OTHER_COLOR]);
+    const packed = indexCategories([...many, ...[12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map((id) => category({ id, parentId: null, name: `Cat ${id}`, kind: "expense" }))]);
+    const eleventh = yearModel([total(1, 15, -100)], packed, 2026).series[0];
+    expect([eleventh.name, eleventh.color]).toEqual(["Cat 15", "var(--s12)"]); // the eleventh has its own hue too
+    const far = yearModel([total(1, 21, -100)], packed, 2026).series[0];
+    expect([far.name, far.color]).toEqual(["Cat 21", OTHER_COLOR]); // past the sixteen hues: gray, but still by name
     expect(y.income).toBe(300000);
     expect(y.spent).toBe(-101200);
   });

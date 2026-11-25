@@ -3,7 +3,7 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
 import { isUncategorized, type CatIndex } from "../lib/categories";
 import { addMonths, currentMonth, euros, money, monthLabel, monthRange, MONTHS_SHORT } from "../lib/format";
-import { costFilterTotals, monthModel, monthlyAverage, spendDelta, spendingShares, subcategorySeries, transferBreakdown, withoutFixed, yearChartCosts, yearModel, type CategoryRow, type CostFilter, type Series } from "../lib/overview";
+import { costFilterTotals, monthModel, monthlyAverage, monthsCovered, spendDelta, spendingShares, subcategorySeries, transferBreakdown, withoutFixed, yearChartCosts, yearModel, type CategoryRow, type CostFilter, type Series } from "../lib/overview";
 import { useSheets } from "../sheets/context";
 import { useAccountRoles, useCats, useTotals, useTransactions } from "../queries";
 import { CategoryIcon, Empty, Segmented, Stepper } from "../ui/controls";
@@ -231,7 +231,7 @@ function YearView({ year, month, costs, cats }: { year: number; month: string; c
     return <div className="card"><Empty title={`No spending in ${year}`}>Import statements covering {year} to see it month by month.</Empty></div>;
   }
 
-  const months = lastMonth + 1;
+  const months = monthsCovered(totals, year, lastMonth);
   const drilled = drillId != null && subs != null ? cats.byId.get(drillId) : undefined;
   const series = drilled ? subs! : model.series;
   const tableSeriesByKey = new Map(series.map((s) => [s.key, s]));

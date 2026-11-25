@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 
 import { currentMonth, money, MONTHS_LONG } from "../lib/format";
-import { costFilterTotals, spendingShares, subcategorySeries, yearChartCosts, yearModel, type CostFilter } from "../lib/overview";
+import { costFilterTotals, monthsCovered, spendingShares, subcategorySeries, yearChartCosts, yearModel, type CostFilter } from "../lib/overview";
 import { useCats, useTotals } from "../queries";
 import { Empty, Segmented } from "../ui/controls";
 import { Icon } from "../ui/Icon";
@@ -34,14 +34,14 @@ export function CategoryBreakdown() {
   const now = currentMonth();
   const nowYear = Number(now.slice(0, 4));
   const lastMonth = year < nowYear ? 11 : year === nowYear ? Number(now.slice(5)) - 1 : -1;
-  const months = lastMonth + 1;
+  const monthsShown = lastMonth + 1;
   const forCategory = (rows: typeof chartTotals) => uncategorized
     ? yearModel(rows, cats, year).series.filter((s) => s.key === "uncategorized")
     : subcategorySeries(rows, cats, year, category!.id);
   const barSeries = forCategory(chartTotals);
   const barColors = new Map(barSeries.map((s) => [s.key, s.color]));
   const pieSeries = forCategory(pieTotals).map((s) => ({ ...s, color: barColors.get(s.key) ?? s.color }));
-  const shares = spendingShares(pieSeries, months);
+  const shares = spendingShares(pieSeries, monthsCovered(totals, year, lastMonth));
   const name = uncategorized ? "Uncategorized" : category!.name;
 
   return (
@@ -64,8 +64,8 @@ export function CategoryBreakdown() {
               } })} />
               <table className="sr-only">
                 <caption>{name} spending by subcategory and month in {year}, excluding yearly costs</caption>
-                <thead><tr><th scope="col">Subcategory</th>{MONTHS_LONG.slice(0, months).map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
-                <tbody>{barSeries.map((series) => <tr key={series.key}><th scope="row">{series.name}</th>{series.data.slice(0, months).map((amount, index) => <td key={index}>{money(amount)}</td>)}</tr>)}</tbody>
+                <thead><tr><th scope="col">Subcategory</th>{MONTHS_LONG.slice(0, monthsShown).map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
+                <tbody>{barSeries.map((series) => <tr key={series.key}><th scope="row">{series.name}</th>{series.data.slice(0, monthsShown).map((amount, index) => <td key={index}>{money(amount)}</td>)}</tr>)}</tbody>
               </table></>
           ) : <Empty title="No spending in this view" />}
         </div>

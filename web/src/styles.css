@@ -10,7 +10,7 @@
   --green: #34c759; --orange: #ff9500; --blue: #007aff; --purple: #af52de; --pink: #ff2d55; --teal: #30b0c7;
   --indigo: #5856d6; --yellow: #ffcc00; --gray: #8e8e93; --red: #ff3b30; --brown: #a2845e;
   /* Chart series per top-level category, fixed order, validated for color vision deficiency on #fff / #1c1c1e. */
-  --s1: #007aff; --s2: #34c759; --s3: #af52de; --s4: #ff9500; --s5: #30b0c7; --s6: #ff2d55; --s8: #5856d6; --s9: #c9a000; --s10: #32ade6; --s11: #ff3b30; --s7: #8e8e93; --s0: #c7c7cc;
+  --s1: #007aff; --s2: #34c759; --s3: #af52de; --s4: #ff9500; --s5: #30b0c7; --s6: #ff2d55; --s8: #5856d6; --s9: #c9a000; --s10: #32ade6; --s11: #ff3b30; --s12: #2c5aa0; --s13: #6c9d00; --s14: #d6409f; --s15: #1e8a4c; --s16: #7d4bc2; --s17: #a8601f; --s7: #8e8e93; --s0: #c7c7cc;
   --font-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Helvetica Neue", system-ui, sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter Variable", "Helvetica Neue", system-ui, sans-serif;
   --font-num: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Inter Variable", system-ui, sans-serif;
@@ -27,7 +27,7 @@
     --shadow-sheet: 0 18px 50px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.3);
     --green: #30d158; --orange: #ff9f0a; --blue: #0a84ff; --purple: #bf5af2; --pink: #ff375f; --teal: #40c8e0;
     --indigo: #5e5ce6; --yellow: #ffd60a; --gray: #98989d; --red: #ff453a; --brown: #ac8e68;
-    --s1: #0a84ff; --s2: #21a446; --s3: #bf5af2; --s4: #d17300; --s5: #2b9fb5; --s6: #ff375f; --s8: #5e5ce6; --s9: #a88600; --s10: #2a9fd6; --s11: #ff453a; --s7: #8e8e93; --s0: #4a4a4e;
+    --s1: #0a84ff; --s2: #21a446; --s3: #bf5af2; --s4: #d17300; --s5: #2b9fb5; --s6: #ff375f; --s8: #5e5ce6; --s9: #a88600; --s10: #2a9fd6; --s11: #ff453a; --s12: #4a78c2; --s13: #6f9a00; --s14: #e052ad; --s15: #1f9d57; --s16: #8f63d6; --s17: #b86e2c; --s7: #8e8e93; --s0: #4a4a4e;
     color-scheme: dark;
   }
 }
@@ -75,6 +75,17 @@ h1 { margin: 0; }
 .main { min-width: 0; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
 .page { flex: 1; overflow-y: auto; }
 .grouped { background: var(--grouped); }
+/* ---------- sign-in ---------- */
+.signin { height: 100%; display: grid; place-items: center; background: var(--bg); overflow-y: auto;
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.signin-card { width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  background: var(--surface); border-radius: 16px; padding: 32px 28px 26px; box-shadow: 0 0 0 .5px var(--sep), 0 8px 30px rgba(0,0,0,.06); }
+.signin-card h1 { font: 700 20px var(--font-display); text-wrap: balance; }
+.signin-card p { margin: 0; color: var(--label-2); text-wrap: pretty; }
+.signin-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 4px; border-radius: 14px;
+  background: linear-gradient(160deg, var(--blue), var(--indigo)); color: #fff; font-size: 26px; }
+.signin-btn { margin-top: 10px; width: 100%; padding-block: 8px; font-size: 14px; }
+.signin-note { font-size: 12px; color: var(--label-3) !important; margin-top: 4px !important; }
 .fatal { margin: auto; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--label-2); padding: 24px; }
 .fatal b { color: var(--label); font-size: 15px; }
 
@@ -544,7 +555,7 @@ table.ytable { border-collapse: collapse; width: 100%; font-size: 12px; font-var
 @media (max-width: 860px) {
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .sb { order: 2; border-right: 0; border-top: .5px solid var(--sep); padding: 6px max(8px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); overflow: visible; }
-  .brand, .sb .h, .sb .h.with-action, .sb .account, .sb .rules-link { display: none; }
+  .brand, .sb .h, .sb .h.with-action, .sb .account, .sb .rules-link, .sb .signout-link { display: none; }
   .sb nav { flex-direction: row; justify-content: space-around; }
   .sb nav a, .sb nav button { flex-direction: column; gap: 2px; font-size: 10.5px; padding: 4px 6px; width: auto; position: relative; }
   .sb nav a svg, .sb nav button svg { font-size: 20px; }
