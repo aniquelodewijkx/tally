@@ -99,8 +99,11 @@ describe("overview", () => {
     expect(y.series[0].data[0]).toBe(100000);
     expect(y.series[1].color).toBe("var(--s8)"); // the seventh expense category gets the seventh hue
     const crowded = indexCategories([...many, ...[12, 13, 14, 15].map((id) => ({ id, parentId: null, name: `Cat ${id}`, kind: "expense" as const }))]);
-    const far = yearModel([total(1, 15, -100)], crowded, 2026).series[0];
-    expect([far.name, far.color]).toEqual(["Cat 15", OTHER_COLOR]); // past the palette: gray, but still by name
+    const eleventh = yearModel([total(1, 15, -100)], crowded, 2026).series[0];
+    expect([eleventh.name, eleventh.color]).toEqual(["Cat 15", "var(--s12)"]); // the eleventh has its own hue too
+    const packed = indexCategories([...many, ...[12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map((id) => ({ id, parentId: null, name: `Cat ${id}`, kind: "expense" as const }))]);
+    const far = yearModel([total(1, 21, -100)], packed, 2026).series[0];
+    expect([far.name, far.color]).toEqual(["Cat 21", OTHER_COLOR]); // past the sixteen hues: gray, but still by name
     expect(y.income).toBe(300000);
     expect(y.spent).toBe(-101200);
   });
