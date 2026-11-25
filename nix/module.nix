@@ -1,6 +1,10 @@
 # NixOS module for Tally. Import it from a checkout or a pinned fetch of this repo:
 #   imports = [ "${tally}/nix/module.nix" ];
-#   services.tally.enable = true;
+#   services.tally = {
+#     enable = true;
+#     passkey.enable = true;         # sign in with a passkey
+#     tailscaleServe.enable = true;  # https://<machine>.<tailnet>.ts.net, needed for passkeys
+#   };
 {
   config,
   lib,
@@ -27,10 +31,29 @@ in
       default = "127.0.0.1:8080";
       example = "100.64.0.1:8080";
       description = ''
-        Address and port to serve on. Tally has no login, so anyone who can reach this address
-        sees all your transactions: keep it on localhost (and put something like `tailscale serve`
-        in front), or on an address only you can reach.
+        Address and port to serve on. Without {option}`services.tally.passkey.enable`, anyone who
+        can reach this address sees all your transactions. Keep it on localhost and use
+        {option}`services.tally.tailscaleServe` to reach it.
       '';
+    };
+
+    passkey.enable = lib.mkEnableOption ''
+      passkey sign-in. Until a passkey is set up, Tally shows a setup screen, and the first passkey
+      made there is the only one that opens it, so set it up right after deploying. It is saved in
+      `/var/lib/tally/passkey.json`: delete that file to sign every device out and set up again.
+      Passkeys need https, which {option}`services.tally.tailscaleServe` provides'';
+
+    tailscaleServe = {
+      enable = lib.mkEnableOption ''
+        serving Tally to your tailnet at `https://<machine>.<tailnet>.ts.net` with `tailscale serve`,
+        which also gets and renews the https certificate. Turn on HTTPS certificates in the tailnet's
+        DNS settings first. Only devices on the tailnet can reach it'';
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 443;
+        description = "The https port on the tailnet.";
+      };
     };
 
     database = {
@@ -55,6 +78,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.tailscaleServe.enable -> config.services.tailscale.enable;
+        message = "services.tally.tailscaleServe needs services.tailscale.enable.";
+      }
+    ];
+
     services.postgresql = lib.mkIf cfg.database.createLocally {
       enable = true;
       ensureDatabases = [ "tally" ];
@@ -81,7 +111,8 @@ in
       environment = {
         DATABASE_URL = cfg.database.url;
         LISTEN_ADDR = cfg.listenAddress;
-      };
+      }
+      // lib.optionalAttrs cfg.passkey.enable { PASSKEY_FILE = "/var/lib/tally/passkey.json"; };
 
       serviceConfig = {
         ExecStart = lib.getExe cfg.package;
@@ -89,8 +120,10 @@ in
         Group = "tally";
         Restart = "on-failure";
         RestartSec = 5;
+        StateDirectory = "tally"; # the passkey file
+        StateDirectoryMode = "0700";
 
-        # Tally only needs the network and the Postgres socket.
+        # Tally only needs the network, the Postgres socket and its state directory.
         CapabilityBoundingSet = "";
         LockPersonality = true;
         MemoryDenyWriteExecute = true;
@@ -124,5 +157,35 @@ in
         UMask = "0077";
       };
     };
+
+    # `tailscale serve` keeps its setting in tailscaled's state; this sets it on every boot and
+    # removes it when the option is turned off.
+    systemd.services.tally-tailscale-serve = lib.mkIf cfg.tailscaleServe.enable (
+      let
+        tailscale = lib.getExe config.services.tailscale.package;
+        https = toString cfg.tailscaleServe.port;
+      in
+      {
+        description = "Serve Tally on the tailnet";
+        after = [
+          "tailscaled.service"
+          "tailscaled-autoconnect.service"
+          "tally.service"
+        ];
+        wants = [ "tailscaled.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${tailscale} serve --bg --yes --https=${https} http://${cfg.listenAddress}";
+          ExecStop = "${tailscale} serve --yes --https=${https} off";
+          # tailscaled may not be signed in yet right after boot, and serve waits for HTTPS
+          # certificates to be turned on: retry, without holding up a rebuild for long.
+          Restart = "on-failure";
+          RestartSec = 10;
+          TimeoutStartSec = "1min";
+        };
+      }
+    );
   };
 }

@@ -15,6 +15,8 @@ use std::path::PathBuf;
 use anyhow::Result;
 use axum::http::{HeaderValue, header};
 use tally_core::{Error, Ledger};
+
+use crate::auth::Auth;
 use tonic::Status;
 use tonic::service::Routes;
 use tower_http::services::{ServeDir, ServeFile};
@@ -24,11 +26,13 @@ pub mod pb {
     tonic::include_proto!("finance");
 }
 
-/// Serves the API on `addr` until `shutdown` resolves: native gRPC, gRPC-web for the browser, and
-/// the built frontend from `web_dir` for every other path (unknown paths get index.html, so the
-/// frontend's own routes work on reload). Same origin, so no CORS.
+/// Serves the API on `addr` until `shutdown` resolves: native gRPC, gRPC-web for the browser,
+/// `/auth/*` for passkey sign-in, and the built frontend from `web_dir` for every other path
+/// (unknown paths get index.html, so the frontend's own routes work on reload). Same origin, so no
+/// CORS. With `auth`, every API call needs a session; the frontend and `/auth/*` don't.
 pub async fn serve(
     ledger: Ledger,
+    auth: Option<Auth>,
     addr: SocketAddr,
     web_dir: Option<PathBuf>,
     shutdown: impl Future<Output = ()> + Send + 'static,
@@ -44,8 +48,14 @@ pub async fn serve(
         .add_service(pb::transaction_service_server::TransactionServiceServer::new(transactions::Svc(ledger)));
 
     // The gRPC-web layer rejects plain HTTP/1 requests, so it wraps only the gRPC routes: axum applies
-    // a layer to what exists when `.layer()` is called, and the static files are added after it.
-    let mut app = routes.routes().into_axum_router().layer(tonic_web::GrpcWebLayer::new());
+    // a layer to what exists when `.layer()` is called, and the other routes are added after it. The
+    // session check sits inside it, so its refusals reach the browser as gRPC-web statuses.
+    let api = routes.routes().into_axum_router();
+    let (api, auth_routes) = match &auth {
+        Some(auth) => (auth.protect(api), auth.routes()),
+        None => (api, Auth::off_routes()),
+    };
+    let mut app = api.layer(tonic_web::GrpcWebLayer::new()).merge(auth_routes);
     if let Some(dir) = web_dir {
         // Always revalidate (the files carry ETag / Last-Modified, so this is a cheap 304), so a
         // reload after a new build never runs a stale index.html.
