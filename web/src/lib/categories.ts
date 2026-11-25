@@ -3,14 +3,16 @@ import type { IconName } from "../ui/Icon";
 
 // Colors belong to top-level categories (children inherit them), assigned in creation order so a
 // category keeps its color when others are added or hidden. Every expense category is its own
-// chart series. The first ten get a hue (validated palette, see styles.css --s1..--s6, --s8..--s11:
-// every neighbouring pair clears the color-blind and normal-vision checks in light and dark);
-// any beyond ten are gray but still listed by name, never merged into "Other".
+// chart series. The first sixteen get a hue (validated palette, see styles.css --s1..--s6,
+// --s8..--s17: every neighbouring pair clears the color-blind and normal-vision checks in light and
+// dark; pairs further apart can look alike, e.g. the two greens); any beyond sixteen are gray but
+// still listed by name, never merged into "Other".
 
 const ICON_COLORS = ["var(--blue)", "var(--green)", "var(--purple)", "var(--orange)", "var(--teal)", "var(--pink)", "var(--indigo)", "var(--yellow)", "var(--brown)"];
 export const SERIES_COLORS = [
   "var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)", "var(--s5)", "var(--s6)",
   "var(--s8)", "var(--s9)", "var(--s10)", "var(--s11)",
+  "var(--s12)", "var(--s13)", "var(--s14)", "var(--s15)", "var(--s16)", "var(--s17)",
 ];
 export const OTHER_COLOR = "var(--s7)";
 export const UNCATEGORIZED_COLOR = "var(--s0)";
@@ -156,7 +158,7 @@ export function txVisual(tx: Tx, cats: CatIndex): TxVisual {
 
 export const isUncategorized = (tx: Tx) => tx.splits.length === 0 && tx.linkKind !== "transfer";
 
-/** Starter tree, created in this order so the first six get the validated chart colors. */
+/** Starter tree, created in this order so it gets the first of the validated chart colors. */
 export const STARTER_CATEGORIES: { name: string; kind: CategoryKind; children?: string[] }[] = [
   { name: "Housing", kind: "expense", children: ["Rent", "Utilities"] },
   { name: "Food", kind: "expense", children: ["Groceries", "Dining out"] },
