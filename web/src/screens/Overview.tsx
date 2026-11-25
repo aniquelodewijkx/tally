@@ -205,12 +205,12 @@ function YearView({ year, cats }: { year: number; cats: CatIndex }) {
   );
   const [hiddenSub, setHiddenSub] = useState<Set<string>>(new Set());
   useEffect(() => setHiddenSub(new Set()), [drillId]);
-  if (!model) return null;
+  if (!totals || !model) return null;
 
   const now = currentMonth();
   const nowYear = Number(now.slice(0, 4));
   const lastMonth = year < nowYear ? 11 : year === nowYear ? Number(now.slice(5)) - 1 : -1;
-  const months = monthsCovered(totals!, year, lastMonth);
+  const months = monthsCovered(totals, year, lastMonth);
   const drilled = drillId != null && subs != null ? cats.byId.get(drillId) : undefined;
   const series = drilled ? subs! : model.series;
   const shownHidden = drilled ? hiddenSub : hidden;

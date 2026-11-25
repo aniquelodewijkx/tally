@@ -84,12 +84,14 @@ describe("overview", () => {
     expect(m.bar.map((b) => b.label)).toEqual(["Housing", "Food", "Uncategorized"]);
   });
 
-  it("averages over the months since the first import, not since January", () => {
+  it("counts months from the first activity in the report, including gaps", () => {
     const fromJune = [total(6, 2, -100000), total(9, 6, 300000), total(11, 3, -500)];
     expect(monthsCovered(fromJune, 2026, 10)).toBe(6); // June to November
     expect(monthsCovered(fromJune, 2026, 11)).toBe(7); // a past year counts up to December
     expect(monthsCovered([...fromJune, total(3, null, 200, { bucket: "in" })], 2026, 10)).toBe(9); // money in counts too
+    expect(monthsCovered([...fromJune, total(4, 2, 0, { spent: -1000, received: 1000 })], 2026, 10)).toBe(8);
     expect(monthsCovered(fromJune, 2025, 11)).toBe(0); // nothing that year
+    expect(monthsCovered(fromJune, 2026, 4)).toBe(0); // activity starts after May
     expect(monthsCovered(fromJune, 2026, -1)).toBe(0); // a year that hasn't started
   });
 

@@ -141,15 +141,17 @@ export function yearModel(totals: Total[], cats: CatIndex, year: number): YearMo
 }
 
 /**
- * How many months a year's averages divide by: from the first month with any money in or out
- * (the first import, for a year that started before it) up to `lastMonth`, the last month that
- * has begun. Dividing by every month since January would make a year imported from June look
- * half as expensive.
+ * Count from the first month with activity in the report through `lastMonth` (zero-based).
+ * Months without activity within that span still count.
  */
 export function monthsCovered(totals: Total[], year: number, lastMonth: number): number {
-  const months = totals.filter((t) => t.year === year && (t.amount !== 0 || t.spent !== 0 || t.received !== 0)).map((t) => t.month - 1);
-  if (months.length === 0 || lastMonth < 0) return 0;
-  return Math.max(0, lastMonth - Math.min(...months) + 1);
+  let firstMonth = lastMonth + 1;
+  for (const t of totals) {
+    if (t.year === year && (t.spent !== 0 || t.received !== 0)) {
+      firstMonth = Math.min(firstMonth, t.month - 1);
+    }
+  }
+  return lastMonth + 1 - firstMonth;
 }
 
 /**
